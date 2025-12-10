@@ -1,0 +1,24 @@
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# Cheminformatics
+pubchempy>=1.0.4
+
+# Network analysis
+networkx>=3.1
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+pyvis>=0.3.2
+
+# Bioinformatics APIs
+reactome2py>=1.0.0
+
+# Configuration & Progress
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Testing
+pytest>=7.3.0

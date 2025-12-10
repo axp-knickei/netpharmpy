@@ -1,0 +1,30 @@
+# Network Pharmacology Tool - Configuration Example
+# Copy this file and modify for your compound
+
+compound:
+  # Use EITHER cid OR smiles (not both)
+  cid: 969516  # Curcumin PubChem CID
+  # smiles: "COC1=C(C=CC(=C1)C=CC(=O)CC(=O)C=CC2=CC(=C(C=C2)O)OC)O"
+
+target_prediction:
+  # Paper defaults from the curcumin study
+  swiss_threshold: 0.0    # SwissTargetPrediction (0.0 = all predictions)
+  superpred_threshold: 0.5  # SuperPred (0.5 = 50%)
+
+pathways:
+  # Pathway keywords or Reactome IDs
+  search_terms:
+    - "cytokine signaling immune system"
+    - "adaptive immune system"
+    - "interleukin signaling"
+    - "T cell activation"
+    # - "R-HSA-1280218"  # Direct pathway ID example
+
+string:
+  confidence: 0.700  # STRING confidence threshold (0.700 = high confidence)
+
+enrichment:
+  method: "gprofiler"  # Options: "david" (manual) or "gprofiler" (API)
+
+output:
+  directory: "./outputs"  # Base output directory

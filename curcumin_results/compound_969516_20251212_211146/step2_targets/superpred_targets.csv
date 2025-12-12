@@ -1,0 +1,91 @@
+Target,Probability,Source,UniProt ID,ChEMBL-ID
+Glyoxalase I,1.0,Known,Q04760,CHEMBL2424
+Coagulation factor III,1.0,Known,P13726,CHEMBL4081
+CDGSH iron-sulfur domain-containing protein 1,1.0,Known,Q9NZ45,CHEMBL1795168
+Prostaglandin E synthase,1.0,Known,O14684,CHEMBL5658
+Neuropeptide S receptor,1.0,Known,Q6W5P4,CHEMBL5162
+Beta amyloid A4 protein,1.0,Known,P05067,CHEMBL2487
+Monoamine oxidase A,1.0,Known,P21397,CHEMBL1951
+DNA-(apurinic or apyrimidinic site) lyase,0.9854999999999999,Predicted,P27695,CHEMBL5619
+Nuclear factor erythroid 2-related factor 2,0.9553,Predicted,Q16236,CHEMBL1075094
+Nuclear factor NF-kappa-B p105 subunit,0.9405,Predicted,P19838,CHEMBL3251
+Kruppel-like factor 5,0.9404,Predicted,Q13887,CHEMBL1293249
+Transcription intermediary factor 1-alpha,0.9185,Predicted,O15164,CHEMBL3108638
+Glycine transporter 2,0.9091,Predicted,Q9Y345,CHEMBL3060
+Proteasome component C5,0.8874,Predicted,P20618,CHEMBL4208
+Arachidonate 12-lipoxygenase,0.879,Predicted,P18054,CHEMBL3687
+Glucose transporter,0.8748,Predicted,P11166,CHEMBL2535
+Transthyretin,0.8715999999999999,Predicted,P02766,CHEMBL3194
+Serotonin 2c (5-HT2c) receptor,0.8697,Predicted,P28335,CHEMBL225
+DNA topoisomerase II alpha,0.8481000000000001,Predicted,P11388,CHEMBL1806
+Dual specificity protein kinase CLK4,0.8469,Predicted,Q9HAZ1,CHEMBL4203
+Pregnane X receptor,0.8073,Predicted,O75469,CHEMBL3401
+Protein Mdm4,0.799,Predicted,O15151,CHEMBL1255126
+Beta-glucuronidase,0.78,Predicted,P08236,CHEMBL2728
+Nuclear receptor ROR-beta,0.7778,Predicted,Q92753,CHEMBL3091268
+Proteasome Macropain subunit,0.7777,Predicted,P49721,CHEMBL3492
+Dipeptidyl peptidase IX,0.7746,Predicted,Q86TI2,CHEMBL4793
+Glycine receptor subunit alpha-1,0.7644,Predicted,P23415,CHEMBL5845
+Cathepsin D,0.7595999999999999,Predicted,P07339,CHEMBL2581
+Platelet-derived growth factor receptor alpha,0.7565000000000001,Predicted,P16234,CHEMBL2007
+PI3-kinase p110-alpha/p85-alpha,0.7556,Predicted,P27986,CHEMBL2111367
+Neuronal acetylcholine receptor; alpha4/beta4,0.7251000000000001,Predicted,P30926,CHEMBL1907591
+C5a anaphylatoxin chemotactic receptor,0.7243,Predicted,P21730,CHEMBL2373
+Thyroid hormone receptor alpha,0.7193,Predicted,P10827,CHEMBL1860
+ADAM10,0.7182999999999999,Predicted,O14672,CHEMBL5028
+C-C chemokine receptor type 1,0.7169,Predicted,P32246,CHEMBL2413
+Hypoxia-inducible factor 1 alpha,0.6938,Predicted,Q16665,CHEMBL4261
+Serine/threonine-protein kinase/endoribonuclease IRE1,0.6843,Predicted,O75460,CHEMBL1163101
+NT-3 growth factor receptor,0.6818000000000001,Predicted,Q16288,CHEMBL5608
+NADPH oxidase 1,0.6762999999999999,Predicted,Q9Y5S8,CHEMBL1287628
+Sodium channel protein type III alpha subunit,0.6744,Predicted,Q9NY46,CHEMBL5163
+Macrophage migration inhibitory factor,0.6737000000000001,Predicted,P14174,CHEMBL2085
+Serine/threonine-protein kinase PLK4,0.6659999999999999,Predicted,O00444,CHEMBL3788
+Cytochrome P450 3A4,0.6637000000000001,Predicted,P08684,CHEMBL340
+Vasopressin V1b receptor,0.6448999999999999,Predicted,P47901,CHEMBL1921
+Methionine aminopeptidase 2,0.6396999999999999,Predicted,P50579,CHEMBL3922
+Dipeptidyl peptidase VIII,0.6378,Predicted,Q6V1X1,CHEMBL4657
+Cytochrome P450 2A6,0.6245,Predicted,P11509,CHEMBL5282
+Excitatory amino acid transporter 1,0.6161,Predicted,P43003,CHEMBL3085
+"Glutamate receptor ionotropic, AMPA 2",0.6108,Predicted,P42262,CHEMBL4016
+Signal transducer and activator of transcription 1-alpha/beta,0.6104999999999999,Predicted,P42224,CHEMBL6101
+Ectonucleotide pyrophosphatase/phosphodiesterase family member 1,0.604,Predicted,P22413,CHEMBL5925
+Glutamate NMDA receptor; GRIN1/GRIN2B,0.599,Predicted,Q05586,CHEMBL1907603
+P2X purinoceptor 4,0.5938,Predicted,Q99571,CHEMBL2104
+Lipoxin A4 receptor,0.5913,Predicted,P25090,CHEMBL4227
+Pyroglutamylated RFamide peptide receptor,0.5857,Predicted,Q96P65,CHEMBL5852
+Platelet-derived growth factor receptor,0.5811,Predicted,P09619,CHEMBL2095189
+Cyclin-dependent kinase 5,0.5658,Predicted,Q00535,CHEMBL4036
+"Glutaminase kidney isoform, mitochondrial",0.5643,Predicted,O94925,CHEMBL2146302
+Lysosomal Pro-X carboxypeptidase,0.5633,Predicted,P42785,CHEMBL2335
+C-C chemokine receptor type 2,0.5622,Predicted,P41597,CHEMBL4015
+Relaxin receptor 1,0.5618,Predicted,Q9HBX9,CHEMBL1293316
+Acetyl-CoA carboxylase 2,0.5585,Predicted,O00763,CHEMBL4829
+Voltage-gated N-type calcium channel alpha-1B subunit,0.5561,Predicted,Q00975,CHEMBL4478
+Serine/threonine-protein kinase TAO1,0.5548,Predicted,Q7L7X3,CHEMBL5261
+Tyrosine-protein kinase FGR,0.5526,Predicted,P09769,CHEMBL4454
+Peptidyl-prolyl cis-trans isomerase NIMA-interacting 1,0.5518,Predicted,Q13526,CHEMBL2288
+Protein tyrosine kinase 2 beta,0.5507,Predicted,Q14289,CHEMBL5469
+Cyclin-dependent kinase 2/cyclin E1,0.5458,Predicted,P24864,CHEMBL1907605
+Dipeptidyl peptidase II,0.5446,Predicted,Q9UHL4,CHEMBL3976
+Dual specificty protein kinase CLK1,0.5418999999999999,Predicted,P49759,CHEMBL4224
+Ephrin type-B receptor 2,0.5382,Predicted,P29323,CHEMBL3290
+Adaptor-associated kinase,0.5366,Predicted,Q2M2I8,CHEMBL3830
+Dual specificity phosphatase Cdc25B,0.5311,Predicted,P30305,CHEMBL4804
+Integrin alpha-4/beta-1,0.5301,Predicted,P05556,CHEMBL1907599
+Cyclooxygenase-1,0.5287,Predicted,P23219,CHEMBL221
+Dual specificity phosphatase Cdc25C,0.525,Predicted,P30307,CHEMBL2378
+Excitatory amino acid transporter 3,0.5246,Predicted,P43005,CHEMBL2721
+Dual specificity protein phosphatase 3,0.5226,Predicted,P51452,CHEMBL2635
+Acetylcholine receptor; alpha1/beta1/delta/gamma,0.517,Predicted,P02708,CHEMBL1907588
+SUMO-activating enzyme,0.5162,Predicted,Q9UBE0,CHEMBL2095174
+Voltage-gated T-type calcium channel alpha-1H subunit,0.5151,Predicted,O95180,CHEMBL1859
+Phosphodiesterase 3A,0.5144,Predicted,Q14432,CHEMBL241
+Galectin-3,0.5127,Predicted,P17931,CHEMBL4531
+Phosphodiesterase 3B,0.5093,Predicted,Q13370,CHEMBL290
+Tyrosine-protein kinase receptor UFO,0.5083,Predicted,P30530,CHEMBL4895
+Kallikrein 7,0.5075999999999999,Predicted,P49862,CHEMBL2443
+Inosine-5'-monophosphate dehydrogenase 2,0.5039,Predicted,P12268,CHEMBL2002
+Protein-tyrosine phosphatase 2C,0.5034000000000001,Predicted,Q06124,CHEMBL3864
+Dopamine D1 receptor,0.502,Predicted,P21728,CHEMBL2056
+Dual specificity mitogen-activated protein kinase kinase 2,0.501,Predicted,P36507,CHEMBL2964

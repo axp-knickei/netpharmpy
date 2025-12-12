@@ -1,0 +1,21 @@
+2025-12-11 01:31:31 - netpharm - INFO - Log file created: ./test_outputs/compound_969516_20251211_013131/969516_20251211_013131.log
+2025-12-11 01:31:31 - netpharm - INFO - 
+======================================================================
+2025-12-11 01:31:31 - netpharm - INFO - NETWORK PHARMACOLOGY ANALYSIS PIPELINE v1.0.0
+2025-12-11 01:31:31 - netpharm - INFO - ======================================================================
+2025-12-11 01:31:31 - netpharm - INFO - Output directory: ./test_outputs/compound_969516_20251211_013131
+2025-12-11 01:31:31 - netpharm - INFO - Compound identifier: 969516
+2025-12-11 01:31:31 - netpharm - INFO - 
+======================================================================
+2025-12-11 01:31:31 - netpharm - INFO - [STEP 1] RETRIEVING COMPOUND INFORMATION FROM PUBCHEM
+2025-12-11 01:31:31 - netpharm - INFO - ======================================================================
+2025-12-11 01:31:31 - netpharm - INFO - Querying PubChem CID: 969516
+2025-12-11 01:31:32 - netpharm - INFO - 
+✓ Compound information retrieved successfully!
+2025-12-11 01:31:32 - netpharm - INFO -   CID: 969516
+2025-12-11 01:31:32 - netpharm - INFO -   Formula: C21H20O6
+2025-12-11 01:31:32 - netpharm - INFO -   Molecular Weight: 368.4
+2025-12-11 01:31:32 - netpharm - INFO -   Canonical SMILES: COC1=C(C=CC(=C1)C=CC(=O)CC(=O)C=CC2=CC(=C(C=C2)O)OC)O
+2025-12-11 01:31:32 - netpharm - INFO - 
+📄 Compound information saved to: ./test_outputs/compound_969516_20251211_013131/step1_compound_info/compound_info.csv
+2025-12-11 01:31:32 - netpharm - INFO -    This CSV contains: CID, SMILES, molecular formula, and weight

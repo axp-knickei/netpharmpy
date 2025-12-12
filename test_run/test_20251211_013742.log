@@ -1,0 +1,12 @@
+2025-12-11 01:37:42 - netpharm - INFO - Log file created: ./test_run/test_20251211_013742.log
+2025-12-11 01:37:42 - netpharm - INFO - 
+======================================================================
+2025-12-11 01:37:42 - netpharm - INFO - [STEP 1] RETRIEVING COMPOUND INFORMATION FROM PUBCHEM
+2025-12-11 01:37:42 - netpharm - INFO - ======================================================================
+2025-12-11 01:37:42 - netpharm - INFO - Querying PubChem CID: 969516
+2025-12-11 01:37:43 - netpharm - INFO - 
+✓ Compound information retrieved successfully!
+2025-12-11 01:37:43 - netpharm - INFO -   CID: 969516
+2025-12-11 01:37:43 - netpharm - INFO -   Formula: C21H20O6
+2025-12-11 01:37:43 - netpharm - INFO -   Molecular Weight: 368.4
+2025-12-11 01:37:43 - netpharm - INFO -   Canonical SMILES: COC1=C(C=CC(=C1)C=CC(=O)CC(=O)C=CC2=CC(=C(C=C2)O)OC)O

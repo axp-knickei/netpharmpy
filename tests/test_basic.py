@@ -60,9 +60,16 @@ class TestAPIs:
         """Test PubChem query by CID."""
         result = query_pubchem(cid=969516)  # Curcumin
         
-        assert 'CanonicalSMILES' in result
+        # PubChem API may return CanonicalSMILES or ConnectivitySMILES
+        has_smiles = any(key in result for key in ['CanonicalSMILES', 'ConnectivitySMILES'])
+        assert has_smiles, f"No SMILES found in result: {result.keys()}"
+        
         assert 'MolecularFormula' in result
         assert result['MolecularFormula'] == 'C21H20O6'
+        
+        # Verify CID
+        assert result.get('CID') == 969516
+
     
     def test_query_pubchem_invalid_cid(self):
         """Test PubChem query with invalid CID."""

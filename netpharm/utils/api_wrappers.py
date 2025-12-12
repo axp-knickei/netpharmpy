@@ -16,17 +16,20 @@ def query_pubchem(cid=None, smiles=None):
         smiles: SMILES string
     
     Returns:
-        dict: Compound information
+        dict: Compound information with standardized keys
     
     Raises:
         requests.RequestException: If query fails
     """
     base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
     
+    # Request multiple SMILES representations to handle API variations
+    properties = "CanonicalSMILES,IsomericSMILES,ConnectivitySMILES,MolecularFormula,MolecularWeight,IUPACName"
+    
     if cid:
-        url = f"{base_url}/compound/cid/{cid}/property/CanonicalSMILES,IsomericSMILES,MolecularFormula,MolecularWeight,IUPACName/JSON"
+        url = f"{base_url}/compound/cid/{cid}/property/{properties}/JSON"
     elif smiles:
-        url = f"{base_url}/compound/smiles/{smiles}/property/CanonicalSMILES,IsomericSMILES,MolecularFormula,MolecularWeight,IUPACName/JSON"
+        url = f"{base_url}/compound/smiles/{smiles}/property/{properties}/JSON"
     else:
         raise ValueError("Either CID or SMILES must be provided")
     
@@ -35,14 +38,21 @@ def query_pubchem(cid=None, smiles=None):
     
     if response.status_code == 200:
         data = response.json()
-        return data['PropertyTable']['Properties'][0]
+        result = data['PropertyTable']['Properties'][0]
+        
+        # Standardize: Ensure CanonicalSMILES exists
+        if 'CanonicalSMILES' not in result and 'ConnectivitySMILES' in result:
+            result['CanonicalSMILES'] = result['ConnectivitySMILES']
+        
+        return result
     else:
         raise requests.RequestException(f"PubChem query failed with status {response.status_code}")
 
 
+
 def query_reactome(query_term, species="Homo sapiens"):
     """
-    Search Reactome for pathways.
+    Search Reactome for pathways with robust error handling.
     
     Args:
         query_term: Search keyword or pathway ID
@@ -50,6 +60,9 @@ def query_reactome(query_term, species="Homo sapiens"):
     
     Returns:
         list: List of pathway dictionaries
+    
+    Raises:
+        ConnectionError: If network issues occur
     """
     base_url = "https://reactome.org/ContentService/search/query"
     
@@ -59,15 +72,27 @@ def query_reactome(query_term, species="Homo sapiens"):
         'types': 'Pathway'
     }
     
-    response = requests.get(base_url, params=params, timeout=30)
-    time.sleep(0.5)
-    
-    if response.status_code == 200:
-        data = response.json()
-        if 'results' in data:
-            return data['results']
-    
-    return []
+    try:
+        response = requests.get(base_url, params=params, timeout=30)
+        time.sleep(0.5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'results' in data and data['results']:
+                return data['results']
+            return []
+        elif response.status_code == 503:
+            raise ConnectionError("Reactome service temporarily unavailable (503)")
+        else:
+            raise ConnectionError(f"Reactome API returned status {response.status_code}")
+            
+    except requests.exceptions.ConnectionError as e:
+        raise ConnectionError(f"Network connection failed: {str(e)}")
+    except requests.exceptions.Timeout:
+        raise ConnectionError("Request timed out - Reactome server may be slow")
+    except requests.exceptions.RequestException as e:
+        raise ConnectionError(f"Request failed: {str(e)}")
+
 
 
 def get_pathway_proteins(pathway_id):

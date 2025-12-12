@@ -52,14 +52,23 @@ class CompoundRetriever:
                 raise ValueError("Either CID or SMILES must be provided")
             
             # Extract compound data
+            # Extract compound data (compatible with all PubChemPy versions)
+            def get_smiles_property(compound, preferred, fallback):
+                """Get SMILES with fallback for different PubChemPy versions."""
+                for attr in [preferred, fallback]:
+                    if hasattr(compound, attr):
+                        return getattr(compound, attr)
+                return 'N/A'
+
             self.compound_data = {
                 'cid': compound.cid,
-                'canonical_smiles': compound.canonical_smiles,
-                'isomeric_smiles': compound.isomeric_smiles,
+                'canonical_smiles': get_smiles_property(compound, 'connectivity_smiles', 'canonical_smiles'),
+                'isomeric_smiles': get_smiles_property(compound, 'smiles', 'isomeric_smiles'),
                 'molecular_formula': compound.molecular_formula,
                 'molecular_weight': compound.molecular_weight,
                 'iupac_name': compound.iupac_name if hasattr(compound, 'iupac_name') else 'N/A'
             }
+
             
             self.logger.info("\n✓ Compound information retrieved successfully!")
             self.logger.info(f"  CID: {self.compound_data['cid']}")

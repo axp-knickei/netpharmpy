@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: netpharmpy
+Version: 1.0.0
+Summary: Network pharmacology pipeline for drug discovery and target prediction
+Requires-Python: >=3.8
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: requests>=2.31.0
+Requires-Dist: pubchempy>=1.0.4
+Requires-Dist: networkx>=3.1
+Requires-Dist: matplotlib>=3.7.0
+Requires-Dist: seaborn>=0.12.0
+Requires-Dist: plotly>=5.14.0
+Requires-Dist: pyvis>=0.3.2
+Requires-Dist: reactome2py>=1.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tqdm>=4.65.0
+Requires-Dist: pytest>=7.3.0
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

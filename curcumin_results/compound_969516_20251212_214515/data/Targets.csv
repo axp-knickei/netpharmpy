@@ -1,0 +1,8 @@
+"Target Name","ChEMBL-ID","UniProt ID","PDB Visualization","TTD ID","Min Activity","Assay type"
+"Glyoxalase I","CHEMBL2424","Q04760","3W0T","Not Available","5 nm","Ki"
+"Coagulation factor III","CHEMBL4081","P13726","6R2W","T72702","13.16 nm","IC50"
+"CDGSH iron-sulfur domain-containing protein 1","CHEMBL1795168","Q9NZ45","4EZF","Not Available","101 nm","Ki"
+"Prostaglandin E synthase","CHEMBL5658","O14684","4AL0","T02562","200 nm","IC50"
+"Neuropeptide S receptor","CHEMBL5162","Q6W5P4","Not Available","Not Available","316.2 nm","Potency"
+"Beta amyloid A4 protein","CHEMBL2487","P05067","5BUO","T87024","630 nm","IC50"
+"Monoamine oxidase A","CHEMBL1951","P21397","2Z5Y","Not Available","710 nm","Ki"

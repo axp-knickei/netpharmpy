@@ -34,12 +34,14 @@ def main():
         },
         'pathways': {
             'search_terms': [
-                "cytokine signaling immune system",
-                "adaptive immune system",
-                "signaling by interleukins",
-                "intracellular signaling second messengers"
+                "R-HSA-1280215",  # Cytokine Signaling in Immune system
+                "R-HSA-1280218",  # Adaptive Immune System  
+                "R-HSA-449147",   # Signaling by Interleukins
+                "R-HSA-1489509"   # DAG and IP3 signaling (second messengers)
             ]
         },
+
+
         'string': {
             'confidence': 0.700
         },

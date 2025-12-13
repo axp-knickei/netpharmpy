@@ -1,0 +1,39 @@
+gene_name,uniprot_id,protein_name,pathway_id,pathway_name
+CHUK,O15111,Inhibitor of nuclear factor kappa-B kinase subunit alpha,R-HSA-1280215,Cytokine Signaling in Immune system
+IKBKB,O14920,Inhibitor of nuclear factor kappa-B kinase subunit beta,R-HSA-1280215,Cytokine Signaling in Immune system
+IKBKG,Q9Y6K9,NF-kappa-B essential modulator,R-HSA-1280215,Cytokine Signaling in Immune system
+AKT1,P31749,RAC-alpha serine/threonine-protein kinase,R-HSA-1280215,Cytokine Signaling in Immune system
+RAF1,P04049,RAF proto-oncogene serine/threonine-protein kinase,R-HSA-1280215,Cytokine Signaling in Immune system
+MAPK1,P28482,Mitogen-activated protein kinase 1,R-HSA-1280215,Cytokine Signaling in Immune system
+MAPK3,P27361,Mitogen-activated protein kinase 3,R-HSA-1280215,Cytokine Signaling in Immune system
+TNF,P01375,Tumor necrosis factor,R-HSA-1280215,Cytokine Signaling in Immune system
+IL2,P60568,Interleukin-2,R-HSA-1280215,Cytokine Signaling in Immune system
+IL6,P05231,Interleukin-6,R-HSA-1280215,Cytokine Signaling in Immune system
+JAK1,P23458,Tyrosine-protein kinase JAK1,R-HSA-1280215,Cytokine Signaling in Immune system
+JAK2,O60674,Tyrosine-protein kinase JAK2,R-HSA-1280215,Cytokine Signaling in Immune system
+STAT3,P40763,Signal transducer and activator of transcription 3,R-HSA-1280215,Cytokine Signaling in Immune system
+NFKB1,P19838,Nuclear factor NF-kappa-B p105 subunit,R-HSA-1280215,Cytokine Signaling in Immune system
+STAT1,P42224,Signal transducer and activator of transcription 1-alpha/beta,R-HSA-1280215,Cytokine Signaling in Immune system
+CHUK,O15111,Inhibitor of nuclear factor kappa-B kinase subunit alpha,R-HSA-1280218,Adaptive Immune System
+IKBKB,O14920,Inhibitor of nuclear factor kappa-B kinase subunit beta,R-HSA-1280218,Adaptive Immune System
+IKBKG,Q9Y6K9,NF-kappa-B essential modulator,R-HSA-1280218,Adaptive Immune System
+NFKB1,P19838,Nuclear factor NF-kappa-B p105 subunit,R-HSA-1280218,Adaptive Immune System
+AKT1,P31749,RAC-alpha serine/threonine-protein kinase,R-HSA-1280218,Adaptive Immune System
+MAPK1,P28482,Mitogen-activated protein kinase 1,R-HSA-1280218,Adaptive Immune System
+MAPK3,P27361,Mitogen-activated protein kinase 3,R-HSA-1280218,Adaptive Immune System
+RAF1,P04049,RAF proto-oncogene serine/threonine-protein kinase,R-HSA-1280218,Adaptive Immune System
+IL2,P60568,Interleukin-2,R-HSA-1280218,Adaptive Immune System
+TNF,P01375,Tumor necrosis factor,R-HSA-1280218,Adaptive Immune System
+IL2,P60568,Interleukin-2,R-HSA-449147,Signaling by Interleukins
+IL6,P05231,Interleukin-6,R-HSA-449147,Signaling by Interleukins
+JAK1,P23458,Tyrosine-protein kinase JAK1,R-HSA-449147,Signaling by Interleukins
+JAK2,O60674,Tyrosine-protein kinase JAK2,R-HSA-449147,Signaling by Interleukins
+STAT3,P40763,Signal transducer and activator of transcription 3,R-HSA-449147,Signaling by Interleukins
+AKT1,P31749,RAC-alpha serine/threonine-protein kinase,R-HSA-449147,Signaling by Interleukins
+MAPK1,P28482,Mitogen-activated protein kinase 1,R-HSA-449147,Signaling by Interleukins
+RAF1,P04049,RAF proto-oncogene serine/threonine-protein kinase,R-HSA-449147,Signaling by Interleukins
+AKT1,P31749,RAC-alpha serine/threonine-protein kinase,R-HSA-1489509,DAG and IP3 signaling
+MAPK1,P28482,Mitogen-activated protein kinase 1,R-HSA-1489509,DAG and IP3 signaling
+MAPK3,P27361,Mitogen-activated protein kinase 3,R-HSA-1489509,DAG and IP3 signaling
+RAF1,P04049,RAF proto-oncogene serine/threonine-protein kinase,R-HSA-1489509,DAG and IP3 signaling
+NFKB1,P19838,Nuclear factor NF-kappa-B p105 subunit,R-HSA-1489509,DAG and IP3 signaling

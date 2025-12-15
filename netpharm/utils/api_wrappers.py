@@ -105,27 +105,73 @@ def get_pathway_proteins(pathway_id):
     Returns:
         list: List of protein dictionaries
     """
+    # Use the 'participants' endpoint - it returns 200 OK for Pathways
     url = f"https://reactome.org/ContentService/data/participants/{pathway_id}"
     
-    response = requests.get(url, timeout=30)
-    time.sleep(0.5)
-    
-    proteins = []
-    if response.status_code == 200:
-        data = response.json()
+    try:
+        response = requests.get(url, timeout=30)
+        time.sleep(0.5)
         
-        for participant in data:
-            if 'refEntities' in participant:
-                for entity in participant['refEntities']:
-                    if entity.get('databaseName') == 'UniProt':
-                        gene_name = entity.get('geneName', ['Unknown'])[0] if entity.get('geneName') else 'Unknown'
+        proteins = []
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Iterate through the physical entities (PEs)
+            for pe in data:
+                # UniProt info is nested inside 'refEntities'
+                ref_entities = pe.get('refEntities', [])
+                if not ref_entities:
+                    continue
+                    
+                for ref in ref_entities:
+                    # Robustly check if this is a UniProt entry
+                    # The API response often omits 'databaseName', so we check multiple fields
+                    is_uniprot = False
+                    if ref.get('databaseName') == 'UniProt':
+                        is_uniprot = True
+                    elif ref.get('schemaClass') in ['ReferenceGeneProduct', 'ReferenceIsoform']:
+                        is_uniprot = True
+                    elif str(ref.get('stId', '')).startswith('uniprot:'):
+                        is_uniprot = True
+                    elif str(ref.get('displayName', '')).startswith('UniProt:'):
+                        is_uniprot = True
+                        
+                    if is_uniprot:
+                        # 1. Extract UniProt ID
+                        uniprot_id = ref.get('identifier', 'N/A')
+                        
+                        # 2. Extract Gene Name (try multiple sources)
+                        gene_name = None
+                        
+                        # Try explicit geneName list in refEntity
+                        if 'geneName' in ref and ref['geneName']:
+                            gene_name = ref['geneName'][0]
+                        
+                        # Try parsing refEntity displayName (e.g., "UniProt:P07333 CSF1R")
+                        if not gene_name and 'displayName' in ref:
+                            parts = ref['displayName'].split(' ')
+                            if len(parts) > 1:
+                                gene_name = parts[-1]
+                        
+                        # Try parsing PhysicalEntity displayName (e.g., "CSF1R [plasma membrane]")
+                        if not gene_name and 'displayName' in pe:
+                            # Take the part before the first bracket
+                            gene_name = pe['displayName'].split(' [')[0]
+                            
+                        if not gene_name:
+                            gene_name = 'Unknown'
+                            
                         proteins.append({
                             'gene_name': gene_name,
-                            'uniprot_id': entity.get('identifier', 'N/A'),
-                            'protein_name': entity.get('displayName', 'N/A')
+                            'uniprot_id': uniprot_id,
+                            'protein_name': pe.get('displayName', 'N/A')
                         })
-    
-    return proteins
+        
+        return proteins
+
+    except requests.RequestException:
+        # Return empty list on failure instead of crashing
+        return []
 
 
 def query_string(gene_list: List[str], species: int = 9606, required_score: int = 700):

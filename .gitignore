@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Output files
+outputs/
+curcumin_results/
+test_outputs/
+test_run/
+*.log
+
+# Data files
+data/
+*.csv
+*.tsv
+
+# OS
+.DS_Store
+Thumbs.db

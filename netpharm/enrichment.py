@@ -126,6 +126,20 @@ class EnrichmentAnalyzer:
             
             enrichment_data = []
             for term in results:
+                # FIX: Handle intersections robustly (ensure all items are strings)
+                # The API might return lists of lists or non-string objects
+                raw_intersections = term.get('intersections', [])
+                cleaned_intersections = []
+                
+                for item in raw_intersections:
+                    if isinstance(item, list):
+                        # If nested list, flatten it or stringify elements
+                        cleaned_intersections.extend([str(x) for x in item])
+                    else:
+                        cleaned_intersections.append(str(item))
+                
+                intersection_str = ','.join(cleaned_intersections)
+
                 enrichment_data.append({
                     'Source': term['source'],
                     'Term_ID': term['native'],
@@ -137,7 +151,7 @@ class EnrichmentAnalyzer:
                     'Intersection_Size': term['intersection_size'],
                     'Precision': term['precision'],
                     'Recall': term['recall'],
-                    'Intersections': ','.join(term.get('intersections', []))
+                    'Intersections': intersection_str
                 })
             
             self.enrichment_results = pd.DataFrame(enrichment_data)

@@ -144,36 +144,48 @@ class NetworkPharmacology:
         
         return self.overlapping_targets
     
-    def build_network(self, confidence=0.700):
-        """Step 4: Build and analyze STRING network."""
-        if self.overlapping_targets is None:
-            raise ValueError("Must analyze pathways first")
-        
-        step_dir = os.path.join(self.output_dir, "step4_network")
-        os.makedirs(step_dir, exist_ok=True)
-        
-        # Get unique genes
-        network_genes = self.overlapping_targets['gene_name'].unique().tolist()
-        
-        # Query STRING
-        interactions = self.network_analyzer.query_string_network(
-            gene_list=network_genes,
-            confidence=confidence
-        )
-        
-        # Build network
-        self.network = self.network_analyzer.build_network()
-        
-        # Analyze network
-        metrics = self.network_analyzer.analyze_network()
-        
-        # Save results
-        self.network_analyzer.save_results(step_dir)
-        
-        # Create visualizations
-        self.visualizer.create_all_visualizations(self.network, step_dir)
-        
-        return self.network
+    def build_network(self, confidence=0.700, scope="all"):
+            """
+            Step 4: Build and analyze STRING network.
+            
+            Args:
+                confidence: Minimum interaction confidence
+                scope: 'all' for all predicted targets, 'overlap' for pathway overlaps only
+            """
+            step_dir = os.path.join(self.output_dir, "step4_network")
+            os.makedirs(step_dir, exist_ok=True)
+            
+            # Select genes based on scope
+            if scope == "all":
+                if self.target_genes is None:
+                    raise ValueError("Must predict targets first")
+                network_genes = self.target_genes
+                self.logger.info(f"\nUsing ALL predicted targets for network: {len(network_genes)} genes")
+            else:
+                if self.overlapping_targets is None:
+                    raise ValueError("Must analyze pathways first")
+                network_genes = self.overlapping_targets['gene_name'].unique().tolist()
+                self.logger.info(f"\nUsing only pathway-overlapping targets: {len(network_genes)} genes")
+            
+            # Query STRING
+            interactions = self.network_analyzer.query_string_network(
+                gene_list=network_genes,
+                confidence=confidence
+            )
+            
+            # Build network
+            self.network = self.network_analyzer.build_network()
+            
+            # Analyze network
+            metrics = self.network_analyzer.analyze_network()
+            
+            # Save results
+            self.network_analyzer.save_results(step_dir)
+            
+            # Create visualizations
+            self.visualizer.create_all_visualizations(self.network, step_dir)
+            
+            return self.network
     
     def enrichment_analysis(self, method='gprofiler'):
         """Step 5: Functional enrichment analysis."""
@@ -228,7 +240,8 @@ class NetworkPharmacology:
             
             # Step 4: Network analysis
             confidence = self.config.get('string', {}).get('confidence', 0.700)
-            self.build_network(confidence=confidence)
+            # CHANGE: Use scope='all' to generate the full complex network
+            self.build_network(confidence=confidence, scope="all")
             
             # Step 5: Enrichment
             enrichment_method = self.config.get('enrichment', {}).get('method', 'gprofiler')

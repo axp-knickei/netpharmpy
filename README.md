@@ -2,9 +2,14 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey.svg)]()
+[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey.svg)]
 
 **Network pharmacology pipeline for drug discovery and target prediction.** Integrates Reactome pathway analysis, STRING protein-protein interaction networks, and multi-omics enrichment (GO/KEGG/Reactome). User-friendly Python framework for computational biologists with guided workflows and publication-ready outputs.
+
+
+[![pathway enrichment](paper_replication_results/compound_969516_20251216_163546/Figure_B_Adaptive/enrichment_bubble_grouped.png)]
+
+[![string interaction](string_interactions.png)]
 
 ---
 

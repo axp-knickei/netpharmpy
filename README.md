@@ -2,7 +2,8 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey.svg)]
+[![DOI](https://doi.org/10.5281/zenodo.18074031)]
+
 
 **Network pharmacology pipeline for drug discovery and target prediction.** Integrates Reactome pathway analysis, STRING protein-protein interaction networks, and multi-omics enrichment (GO/KEGG/Reactome). User-friendly Python framework for computational biologists with guided workflows and publication-ready outputs.
 
@@ -52,6 +53,38 @@
 - Systems pharmacology research
 
 **Inspired by:** Limsakul et al. (2025) - [Immunomodulatory Effects of Curcumin on CAR T-Cell Therapy](https://doi.org/10.3390/antiox14040454)
+
+### Motivation and design rationale
+
+Pharmacological effects often emerge from interactions across complex biological networks rather than from modulation of single molecular targets. While numerous databases and tools exist for drug–target and protein–protein interaction analysis, many available solutions are tightly coupled to specific data sources, impose rigid analytical pipelines, or obscure intermediate computational steps.
+
+netpharmpy was developed to address these limitations by offering a **minimal and extensible software layer** that allows researchers to:
+
+1. Represent pharmacological data explicitly as networks,
+2. Apply graph-based analyses using familiar Python workflows, and
+3. Integrate custom data sources and downstream analyses without vendor or database lock-in.
+
+The software prioritizes methodological clarity over automation and is intentionally agnostic to specific biological interpretations or predictive claims.
+
+### Core functionality
+
+At its core, netpharmpy provides utilities for:
+- Constructing network representations of drug–target interactions and related biological relationships
+- Manipulating and querying these networks using graph-based abstractions
+- Performing basic network analyses suitable for exploratory systems pharmacology research
+
+The package is designed to interoperate seamlessly with the broader scientific Python ecosystem, allowing users to extend analyses using external libraries for statistics, visualization, or downstream biological interpretation.
+
+### Intended use cases
+
+netpharmpy is suitable for a range of research-oriented applications, including:
+- Exploratory analysis of drug–target interaction networks
+- Investigation of polypharmacology and multi-target drug effects
+- Integration of pharmacological data with protein–protein interaction networks
+- Identification of subnetworks or pathways potentially perturbed by drug intervention
+- Rapid prototyping of network pharmacology workflows prior to large-scale or production-level analyses
+
+The software is intended for use by computational biologists, bioinformaticians, and systems pharmacology researchers with basic familiarity in Python programming.
 
 ---
 
@@ -345,7 +378,8 @@ If you use netpharmpy in your research, please cite:
   title = {netpharmpy: Network Pharmacology Pipeline for Drug Discovery},
   year = {2025},
   url = {https://github.com/axp-knickei/netpharmpy},
-  version = {1.0.0}
+  version = {0.1.0},
+  doi={doi.org/10.5281/zenodo.18074031}
 }
 ```
 
@@ -452,9 +486,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📊 Project Status
 
 ![Development Status](https://img.shields.io/badge/status-active-success.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![DOI](https://doi.org/10.5281/zenodo.18074031)
 
-### Current Version: 1.0.0
+### Current Version: 0.1.0
 
 **Release Date:** December 2025
 
@@ -471,34 +506,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Roadmap
 
-#### v1.1.0 (Q1 2026)
+#### v1.1.0
 - [ ] Backup pathway data for offline analysis
 - [ ] Enhanced error recovery
 - [ ] Additional visualization options
 - [ ] Docker container support
 
-#### v2.0.0 (Q2 2026)
-- [ ] Batch compound analysis
-- [ ] Machine learning predictions
-- [ ] Web interface (Streamlit/Dash)
-- [ ] Database caching
-- [ ] Multi-compound comparison
-
 ### Known Issues
 
+netpharmpy is currently released as early-stage research software. Known limitations include:
+
+- APIs may evolve as the project matures
 - Reactome API may occasionally be unavailable (temporary server issues)
 - Manual downloads required for SwissTargetPrediction and SuperPred
+- Documentation and tutorials are intentionally minimal but under active development
+- Performance has not yet been optimized for very large-scale networks
 - Large networks (>100 proteins) may take longer to visualize
+- The package does not provide built-in visualization or clinical interpretation modules
+
+Biological interpretation of results remains the responsibility of the user, and netpharmpy does not aim to provide clinical or predictive decision support.
 
 Report bugs or request features: [GitHub Issues](https://github.com/axp-knickei/netpharmpy/issues)
-
----
-
-## 🔗 Related Projects
-
-- **Network Medicine Tools**: [link if any]
-- **Drug Repurposing Pipelines**: [link if any]
-- **Systems Pharmacology Resources**: [link if any]
 
 ---
 
@@ -511,4 +539,4 @@ Report bugs or request features: [GitHub Issues](https://github.com/axp-knickei/
 
 ---
 
-*Last updated: December 13, 2025*
+*Last updated: December 28, 2025*

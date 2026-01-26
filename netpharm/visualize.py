@@ -5,7 +5,6 @@ Network visualization functions.
 import matplotlib.pyplot as plt
 import seaborn as sns
 import networkx as nx
-import pandas as pd
 import os
 from pyvis.network import Network as PyVisNetwork
 
@@ -59,7 +58,21 @@ class NetworkVisualizer:
         
         # Node sizes by degree
         node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
-        node_sizes = [node_degrees[n] * 120 for n in core_net.nodes()]
+        ## Raw degree value (data, not visualization)
+        raw_degrees = [degree_dict[n] for n in core_net.nodes()]
+        
+        min_node_size = 300
+        max_node_size = 1800
+
+        min_deg = min(raw_degrees)
+        max_deg = max(raw_degrees)
+
+        node_sizes = [
+            min_node_size
+            + (deg - min_deg) / (max_deg - min_deg) * (max_node_size - min_node_size)
+            if max_deg > min_deg else min_node_size
+            for deg in raw_degrees
+        ]
         
         # Edge widths by weight
         edge_weights = [
@@ -124,7 +137,20 @@ class NetworkVisualizer:
         node_colors = [node_degrees[n] for n in core_net.nodes()]
         
         # Node sizes
-        node_sizes = [v * 150 + 400 for v in node_degrees.values()]
+        raw_degrees = [degree_dict[n] for n in core_net.nodes()] # The duplication node_degrees and raw_degrees is intentional
+
+        min_node_size = 300
+        max_node_size = 1800
+
+        min_deg = min(raw_degrees)
+        max_deg = max(raw_degrees)
+
+        node_sizes = [
+            min_node_size
+            + (deg - min_deg) / (max_deg - min_deg) * (max_node_size - min_node_size)
+            if max_deg > min_deg else min_node_size
+            for deg in raw_degrees
+        ]
         
         # Edge widths
         edge_weights = [
@@ -146,7 +172,7 @@ class NetworkVisualizer:
         
         sm = plt.cm.ScalarMappable(
             cmap=plt.cm.viridis,
-            norm-plt.Normalize(
+            norm = plt.Normalize(
                 vmin=min(node_colors),
                 vmax=max(node_colors)
             )
@@ -173,8 +199,6 @@ class NetworkVisualizer:
             )
         
         # Colorbar
-        plt.colorbar(nodes, label='Node Degree (Number of Connections)')
-        
         plt.title('Protein-Protein Interaction Network\nColored by Node Degree',
                  fontsize=16, fontweight='bold')
         plt.axis('off')

@@ -22,6 +22,23 @@ class NetworkVisualizer:
         """
         self.logger = logger
         sns.set_style("whitegrid")
+
+    def _get_top_hub_subgraph(self, network, top_n=25):
+        """
+        Return a subgraph containing the top N nodes by degree.
+        Degree is computed on the full network.
+        """
+        degree_dict = dict(network.degree())
+
+        top_nodes = sorted(
+            degree_dict,
+            key=degree_dict.get,
+            reverse=True
+        )[:top_n]
+
+        core_net = network.subgraph(top_nodes).copy()
+        return core_net, degree_dict
+
     
     def create_basic_visualization(self, network, output_path):
         """
@@ -36,31 +53,44 @@ class NetworkVisualizer:
         plt.figure(figsize=(14, 10))
         
         # Layout
-        pos = nx.spring_layout(network, k=2, iterations=50, seed=42)
+        core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
+        pos = nx.spring_layout(core_net, k=0.6, iterations=200, seed=42)
+
         
         # Node sizes by degree
-        node_degrees = dict(network.degree())
-        node_sizes = [v * 150 + 400 for v in node_degrees.values()]
+        node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
+        node_sizes = [node_degrees[n] * 120 for n in core_net.nodes()]
         
         # Edge widths by weight
-        edge_weights = [network[u][v]['weight'] * 3 for u, v in network.edges()]
+        edge_weights = [
+            core_net[u][v].get('weight', 1) * 3
+            for u, v in core_net.edges()
+            ]
         
         # Draw
-        nx.draw_networkx_nodes(network, pos,
+        nx.draw_networkx_nodes(core_net, pos,
                               node_size=node_sizes,
                               node_color='lightblue',
                               edgecolors='darkblue',
                               linewidths=2,
                               alpha=0.9)
         
-        nx.draw_networkx_edges(network, pos,
+        nx.draw_networkx_edges(core_net, pos,
                               width=edge_weights,
                               alpha=0.5,
                               edge_color='gray')
         
-        nx.draw_networkx_labels(network, pos,
-                               font_size=10,
-                               font_weight='bold')
+        hub_labels = {
+            n: n for n in node_degrees if node_degrees[n] >= 10
+        }
+
+        nx.draw_networkx_labels(
+            core_net,
+            pos,
+            labels=hub_labels,
+            font_size=10,
+            font_weight='bold'
+        )
         
         plt.title('Protein-Protein Interaction Network\n(STRING confidence ≥ 0.700)',
                  fontsize=16, fontweight='bold')
@@ -86,37 +116,61 @@ class NetworkVisualizer:
         plt.figure(figsize=(16, 12))
         
         # Layout
-        pos = nx.spring_layout(network, k=2.5, iterations=50, seed=42)
+        core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
+        pos = nx.spring_layout(core_net, k=0.6, iterations=200, seed=42)
         
         # Node colors by degree
-        node_degrees = dict(network.degree())
-        node_colors = [node_degrees[node] for node in network.nodes()]
+        node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
+        node_colors = [node_degrees[n] for n in core_net.nodes()]
         
         # Node sizes
         node_sizes = [v * 150 + 400 for v in node_degrees.values()]
         
         # Edge widths
-        edge_weights = [network[u][v]['weight'] * 3 for u, v in network.edges()]
+        edge_weights = [
+            core_net[u][v].get('weight', 1) * 3 
+            for u, v in core_net.edges()
+            ]
         
         # Draw nodes
-        nodes = nx.draw_networkx_nodes(network, pos,
-                                      node_size=node_sizes,
-                                      node_color=node_colors,
-                                      cmap=plt.cm.YlOrRd,
-                                      edgecolors='black',
-                                      linewidths=2,
-                                      alpha=0.9)
+        nodes = nx.draw_networkx_nodes(
+            core_net, 
+            pos,
+            node_size=node_sizes,
+            node_color=node_colors,
+            cmap=plt.cm.viridis,
+            edgecolors='black',
+            linewidths=2,
+            alpha=0.9
+            )
+        
+        sm = plt.cm.ScalarMappable(
+            cmap=plt.cm.viridis,
+            norm-plt.Normalize(
+                vmin=min(node_colors),
+                vmax=max(node_colors)
+            )
+        )
+        sm.set_array([])
+
+        plt.colorbar(sm, label="Node degree")
         
         # Draw edges
-        nx.draw_networkx_edges(network, pos,
+        nx.draw_networkx_edges(core_net, pos,
                               width=edge_weights,
                               alpha=0.5,
                               edge_color='gray')
         
         # Draw labels
-        nx.draw_networkx_labels(network, pos,
-                               font_size=9,
-                               font_weight='bold')
+        hub_labels = {n: n for n in node_degrees if node_degrees[n] >= 10}
+
+        nx.draw_networkx_labels(
+            core_net, 
+            pos,
+            labels = hub_labels,
+            font_size=9,
+            font_weight='bold'
+            )
         
         # Colorbar
         plt.colorbar(nodes, label='Node Degree (Number of Connections)')

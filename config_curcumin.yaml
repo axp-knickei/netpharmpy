@@ -1,0 +1,20 @@
+compound:
+  cid: 969516        # Curcumin
+  output_base: ./results_curcumin
+
+target_prediction:
+  swiss_threshold: 0.0
+  superpred_threshold: 0.5
+
+pathways:
+  search_terms:
+    - R-HSA-1280215
+    - R-HSA-1280218
+    - R-HSA-449147
+    - R-HSA-1489509
+
+string:
+  confidence: 0.7
+
+enrichment:
+  method: gprofiler

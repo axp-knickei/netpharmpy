@@ -247,6 +247,25 @@ npharma.analyze_pathways(['R-HSA-1280218', 'R-HSA-1280215'])
 npharma.build_network(confidence=0.700)
 npharma.enrichment_analysis(method='gprofiler')
 ```
+---
+## How to Read This Pipeline
+
+This pipeline is organized as a sequence of steps, but **each step serves a different purpose and uses a different type of reasoning**. The steps are **complementary**, not repetitive.
+
+In simple terms:
+
+* **Steps 1–2** gather *possible targets* for a compound.
+* **Step 3** applies **biological reasoning** to filter those targets to a relevant biological system (e.g., immune signaling).
+* **Step 4** provides **network context**, showing how the selected proteins interact as a system.
+* **Step 5** applies **statistical analysis** to describe which biological functions are over-represented in that system.
+
+Importantly:
+
+* **Step 3 is not a statistical test** — it is a biologically informed filtering step.
+* **Step 4 does not identify drug targets** — it describes system structure and connectivity.
+* **Step 5 does not validate mechanisms** — it statistically summarizes functional themes.
+
+These steps are intentionally separated to avoid conflating **mechanistic reasoning**, **network context**, and **statistical interpretation**. Together, they support **transparent and reproducible hypothesis generation**, not causal inference.
 
 ---
 

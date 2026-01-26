@@ -269,14 +269,42 @@ Predicts potential protein targets using:
 
 **Manual workflow** with clear instructions for downloading results.
 
-### Step 3: Pathway Analysis
+### 🔍 Understanding the Role of Steps 3, 4, and 5
 
-Identifies relevant biological pathways:
-- Searches Reactome database
-- Extracts pathway proteins
-- Finds overlapping targets
+Although Steps 3, 4, and 5 are executed sequentially, they serve **different conceptual purposes** and answer **different biological questions**. They should not be interpreted as redundant analyses.
 
-**Database:** [Reactome](https://reactome.org/)
+**In simple terms:**
+
+* **Step 3 answers *“Which targets are biologically relevant?”***
+* **Step 4 answers *“How do these targets behave as a system?”***
+* **Step 5 answers *“What biological functions are over-represented?”***
+
+Each step represents a **different type of reasoning**, as summarized below.
+
+| Step                               | Type of reasoning                  | Purpose                                                                                                                                                                                                                           |
+| ---------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Step 3 – Pathway Analysis**      | Biological / mechanistic filtering | Restricts predicted targets to those involved in user-selected biological pathways (e.g., immune signaling). This step reduces noise and focuses the analysis on biologically plausible mechanisms.                               |
+| **Step 4 – Network Analysis**      | Systems-level context              | Examines how the selected proteins interact with each other using protein–protein interaction networks. This step identifies highly connected proteins (network hubs) and reveals system structure, not statistical significance. |
+| **Step 5 – Functional Enrichment** | Statistical interpretation         | Tests whether specific biological functions or pathways are over-represented in the selected gene set compared to a background. This step provides statistical support for functional themes.                                     |
+
+Importantly:
+
+* **Step 3 is not a statistical test** — it is a biologically informed filtering step.
+* **Step 4 does not identify drug targets** — it provides network context.
+* **Step 5 does not validate mechanisms** — it highlights statistically enriched functional annotations.
+
+Together, these steps support **hypothesis generation**, not causal inference.
+
+### Step 3: Pathway Analysis (Biological Filtering)
+
+Uses curated biological pathways to filter predicted targets to those relevant to the biological system of interest:
+- Searches user-defined Reactome pathways
+- Extracts all proteins involved in those pathways
+- Retains only predicted targets that overlap with pathway proteins
+
+
+**Database:** [Reactome](https://reactome.org/) (used as a source of curated biological pathway knowledge)
+
 
 ### Step 4: Network Construction
 
@@ -291,14 +319,17 @@ Builds protein-protein interaction networks:
 
 **Database:** [STRING](https://string-db.org/)
 
-### Step 5: Functional Enrichment
+### Step 5: Functional Enrichment (Statistical Interpretation)
 
-Performs pathway enrichment analysis:
-- GO Biological Process, Molecular Function, Cellular Component
-- KEGG pathways
-- Reactome pathways
+Performs statistical enrichment analysis on biologically filtered targets:
+- Gene Ontology (Biological Process, Molecular Function, Cellular Component)
+- KEGG pathway annotations
+- Reactome pathway annotations
 
-**Tools:** [g:Profiler](https://biit.cs.ut.ee/gprofiler/) or [DAVID](https://david.ncifcrf.gov/)
+**Tools:** [g:Profiler](https://biit.cs.ut.ee/gprofiler/) or [DAVID](https://david.ncifcrf.gov/) (used for over-representation analysis)
+
+The pipeline intentionally separates biological filtering (Step 3), network context (Step 4), and statistical interpretation (Step 5). Step 3 determines biological relevance using curated pathway knowledge, while Step 5 statistically describes functional patterns within that biologically constrained gene set. This separation avoids conflating mechanistic reasoning with statistical enrichment.
+
 
 ---
 

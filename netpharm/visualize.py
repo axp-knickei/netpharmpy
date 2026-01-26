@@ -60,6 +60,9 @@ class NetworkVisualizer:
         node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
         ## Raw degree value (data, not visualization)
         raw_degrees = [degree_dict[n] for n in core_net.nodes()]
+
+        # Nodes color (degree-based)
+        node_colors = [node_degrees[n] for n in core_net.nodes()]
         
         min_node_size = 300
         max_node_size = 1800
@@ -142,6 +145,7 @@ class NetworkVisualizer:
         
         # Node colors by degree
         node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
+        node_colors = [node_degrees[n] for n in core_net.nodes()]
         
         # Node sizes
         raw_degrees = [degree_dict[n] for n in core_net.nodes()] # The duplication node_degrees and raw_degrees is intentional

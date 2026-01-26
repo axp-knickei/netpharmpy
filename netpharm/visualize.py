@@ -81,8 +81,6 @@ class NetworkVisualizer:
             ]
         
         # Draw nodes
-        node_colors = [node_degrees[n] for n in core_net.nodes()]
-
         nodes = nx.draw_networkx_nodes(
             core_net,
             pos,
@@ -144,7 +142,6 @@ class NetworkVisualizer:
         
         # Node colors by degree
         node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
-        node_colors = [node_degrees[n] for n in core_net.nodes()]
         
         # Node sizes
         raw_degrees = [degree_dict[n] for n in core_net.nodes()] # The duplication node_degrees and raw_degrees is intentional
@@ -169,18 +166,19 @@ class NetworkVisualizer:
             ]
         
         # Draw nodes
-        node_colors = [node_degrees[n] for n in core_net.nodes()]
 
         nodes = nx.draw_networkx_nodes(
             core_net, 
             pos,
-            ax = ax,
-            width = edge_weights,
-            alpha = 0,5
+            ax=ax,
+            node_size=node_sizes,
+            node_color=node_colors,
+            cmap=plt.cm.viridis,
             edgecolors='black',
             linewidths=2,
             alpha=0.9
-            )
+        )
+
         
         sm = plt.cm.ScalarMappable(
             cmap=plt.cm.viridis,
@@ -192,9 +190,7 @@ class NetworkVisualizer:
         sm.set_array([])
 
         cbar = fig.colorbar(sm, ax = ax)
-        cbar.set_label("Node degree")
-        
-        # Draw edges
+
         nx.draw_networkx_edges(
             core_net, 
             pos,
@@ -202,7 +198,8 @@ class NetworkVisualizer:
             width=edge_weights,
             alpha=0.5,
             edge_color='gray'
-        )
+            )
+
 
         
         # Draw labels

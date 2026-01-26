@@ -80,8 +80,8 @@ class NetworkVisualizer:
             for u, v in core_net.edges()
             ]
         
-        # Draw
-        nx.draw_networkx_edges(core_net, pos, ax=ax, alpha=0.4)
+        # Draw nodes
+        node_colors = [node_degrees[n] for n in core_net.nodes()]
 
         nodes = nx.draw_networkx_nodes(
             core_net,
@@ -93,10 +93,14 @@ class NetworkVisualizer:
             edgecolors='black'
         )    
         
-        nx.draw_networkx_edges(core_net, pos,
-                              width=edge_weights,
-                              alpha=0.5,
-                              edge_color='gray')
+        nx.draw_networkx_edges(
+            core_net, 
+            pos,
+            ax = ax,
+            width=edge_weights,
+            alpha=0.5,
+            edge_color='gray'
+            )
         
         hub_labels = {
             n: n for n in node_degrees if node_degrees[n] >= 10
@@ -165,12 +169,14 @@ class NetworkVisualizer:
             ]
         
         # Draw nodes
+        node_colors = [node_degrees[n] for n in core_net.nodes()]
+
         nodes = nx.draw_networkx_nodes(
             core_net, 
             pos,
-            node_size=node_sizes,
-            node_color=node_colors,
-            cmap=plt.cm.viridis,
+            ax = ax,
+            width = edge_weights,
+            alpha = 0,5
             edgecolors='black',
             linewidths=2,
             alpha=0.9
@@ -192,14 +198,12 @@ class NetworkVisualizer:
         nx.draw_networkx_edges(
             core_net, 
             pos,
-            ax = ax,
-            node_size = node_sizes,
-            node_color = node_colors,
-            cmap-plt.viridis,
+            ax=ax,
             width=edge_weights,
             alpha=0.5,
             edge_color='gray'
-            )
+        )
+
         
         # Draw labels
         hub_labels = {n: n for n in node_degrees if node_degrees[n] >= 10}

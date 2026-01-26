@@ -49,7 +49,7 @@ class NetworkVisualizer:
         """
         self.logger.info("\n--- Creating Basic Network Visualization ---")
         
-        plt.figure(figsize=(14, 10))
+        fig, ax = plt.subplots(figsize=(10, 10))
         
         # Layout
         core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
@@ -81,12 +81,17 @@ class NetworkVisualizer:
             ]
         
         # Draw
-        nx.draw_networkx_nodes(core_net, pos,
-                              node_size=node_sizes,
-                              node_color='lightblue',
-                              edgecolors='darkblue',
-                              linewidths=2,
-                              alpha=0.9)
+        nx.draw_networkx_edges(core_net, pos, ax=ax, alpha=0.4)
+
+        nodes = nx.draw_networkx_nodes(
+            core_net,
+            pos,
+            ax=ax,
+            node_size=node_sizes,
+            node_color=node_colors,
+            cmap=plt.cm.viridis,
+            edgecolors='black'
+        )    
         
         nx.draw_networkx_edges(core_net, pos,
                               width=edge_weights,
@@ -100,8 +105,9 @@ class NetworkVisualizer:
         nx.draw_networkx_labels(
             core_net,
             pos,
+            ax=ax,
             labels=hub_labels,
-            font_size=10,
+            font_size=9,
             font_weight='bold'
         )
         
@@ -126,7 +132,7 @@ class NetworkVisualizer:
         """
         self.logger.info("\n--- Creating Colored Network Visualization ---")
         
-        plt.figure(figsize=(16, 12))
+        fig, ax = plt.subplots(figsize=(10, 10))
         
         # Layout
         core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
@@ -179,13 +185,21 @@ class NetworkVisualizer:
         )
         sm.set_array([])
 
-        plt.colorbar(sm, label="Node degree")
+        cbar = fig.colorbar(sm, ax = ax)
+        cbar.set_label("Node degree")
         
         # Draw edges
-        nx.draw_networkx_edges(core_net, pos,
-                              width=edge_weights,
-                              alpha=0.5,
-                              edge_color='gray')
+        nx.draw_networkx_edges(
+            core_net, 
+            pos,
+            ax = ax,
+            node_size = node_sizes,
+            node_color = node_colors,
+            cmap-plt.viridis,
+            width=edge_weights,
+            alpha=0.5,
+            edge_color='gray'
+            )
         
         # Draw labels
         hub_labels = {n: n for n in node_degrees if node_degrees[n] >= 10}
@@ -193,6 +207,7 @@ class NetworkVisualizer:
         nx.draw_networkx_labels(
             core_net, 
             pos,
+            ax = ax,
             labels = hub_labels,
             font_size=9,
             font_weight='bold'

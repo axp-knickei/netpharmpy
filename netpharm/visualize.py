@@ -1,309 +1,208 @@
-"""
-Network visualization functions.
-"""
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import networkx as nx
 import os
-from pyvis.network import Network as PyVisNetwork
+import matplotlib.pyplot as plt
+import networkx as nx
+from pyvis.network import Network
 
 
 class NetworkVisualizer:
-    """Handle network visualizations."""
-    
-    def __init__(self, logger):
-        """
-        Initialize NetworkVisualizer.
-        
-        Args:
-            logger: Logger instance
-        """
-        self.logger = logger
-        sns.set_style("whitegrid")
+    def __init__(self, output_dir):
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    def _get_top_hub_subgraph(self, network, top_n=25):
+    # ------------------------------------------------------------------
+    # Core graph abstraction
+    # ------------------------------------------------------------------
+    def _get_hubs_and_connectors(self, network, top_n=15):
         """
-        Return a subgraph containing the top N nodes by degree.
-        Degree is computed on the full network.
+        Build a hub-centered subgraph:
+        - hubs = top_n nodes by global degree
+        - connectors = all first neighbors of hubs
         """
+
         degree_dict = dict(network.degree())
+        hubs = sorted(degree_dict, key=degree_dict.get, reverse=True)[:top_n]
 
-        top_nodes = sorted(
-            degree_dict,
-            key=degree_dict.get,
-            reverse=True
-        )[:top_n]
+        connectors = set()
+        for h in hubs:
+            connectors.update(network.neighbors(h))
 
-        core_net = network.subgraph(top_nodes).copy()
-        return core_net, degree_dict
+        nodes_to_keep = set(hubs) | connectors
+        subgraph = network.subgraph(nodes_to_keep).copy()
 
-    
-    def create_basic_visualization(self, network, output_path):
-        """
-        Create basic NetworkX visualization.
-        
-        Args:
-            network: NetworkX graph
-            output_path: Path to save image
-        """
-        self.logger.info("\n--- Creating Basic Network Visualization ---")
-        
+        node_roles = {}
+        for n in subgraph.nodes():
+            if n in hubs:
+                node_roles[n] = "hub"
+            else:
+                node_roles[n] = "connector"
+
+        return subgraph, degree_dict, node_roles
+
+    # ------------------------------------------------------------------
+    # Static visualization (summary)
+    # ------------------------------------------------------------------
+    def create_static_network(self, network, filename, top_n=15):
+        LEGEND_STYLE = "outside"  # options: outside, inside, bottom
+
+        G, degree_dict, roles = self._get_hubs_and_connectors(network, top_n)
+
         fig, ax = plt.subplots(figsize=(10, 10))
-        
-        # Layout
-        core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
-        pos = nx.spring_layout(core_net, k=0.6, iterations=200, seed=42)
+        pos = nx.spring_layout(G, seed=42)
 
-        
-        # Node sizes by degree
-        node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
-        ## Raw degree value (data, not visualization)
-        raw_degrees = [degree_dict[n] for n in core_net.nodes()]
+        # ---- Node sizes (global degree, normalized) ----
+        degrees = [degree_dict[n] for n in G.nodes()]
+        min_size, max_size = 400, 2000
+        dmin, dmax = min(degrees), max(degrees)
 
-        # Nodes color (degree-based)
-        node_colors = [node_degrees[n] for n in core_net.nodes()]
-        
-        min_node_size = 300
-        max_node_size = 1800
+        def scale(d):
+            if dmax == dmin:
+                return min_size
+            return min_size + (d - dmin) / (dmax - dmin) * (max_size - min_size)
 
-        min_deg = min(raw_degrees)
-        max_deg = max(raw_degrees)
+        node_sizes = [scale(degree_dict[n]) for n in G.nodes()]
 
-        node_sizes = [
-            min_node_size
-            + (deg - min_deg) / (max_deg - min_deg) * (max_node_size - min_node_size)
-            if max_deg > min_deg else min_node_size
-            for deg in raw_degrees
-        ]
-        
-        # Edge widths by weight
-        edge_weights = [
-            core_net[u][v].get('weight', 1) * 3
-            for u, v in core_net.edges()
-            ]
-        
-        # Draw nodes
-        nodes = nx.draw_networkx_nodes(
-            core_net,
+        # ---- Node colors (role-based) ----
+        node_colors = []
+        for n in G.nodes():
+            if roles[n] == "hub":
+                node_colors.append("#d62728")  # red
+            else:
+                node_colors.append("#1f77b4")  # blue
+
+        # ---- Edges ----
+        edge_widths = [G[u][v].get("weight", 1) * 2 for u, v in G.edges()]
+
+        nx.draw_networkx_edges(
+            G,
+            pos,
+            ax=ax,
+            width=edge_widths,
+            edge_color="gray",
+            alpha=0.6,
+        )
+
+        nx.draw_networkx_nodes(
+            G,
             pos,
             ax=ax,
             node_size=node_sizes,
             node_color=node_colors,
-            cmap=plt.cm.viridis,
-            edgecolors='black'
-        )    
-        
-        nx.draw_networkx_edges(
-            core_net, 
-            pos,
-            ax = ax,
-            width=edge_weights,
-            alpha=0.5,
-            edge_color='gray'
-            )
-        
-        hub_labels = {
-            n: n for n in node_degrees if node_degrees[n] >= 10
-        }
+            edgecolors="black",
+            linewidths=1.5,
+        )
 
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        legend_elements = [
+            Patch(facecolor="#d62728", edgecolor="black", label="Hub proteins"),
+            Patch(facecolor="#1f77b4", edgecolor="black", label="Connector proteins"),
+            Line2D([0], [0], color="gray", lw=2, label="Protein–protein interaction"),
+        ]
+
+        if LEGEND_STYLE == "outside":
+            ax.legend(
+                handles=legend_elements,
+                loc="center left",
+                bbox_to_anchor=(1.02, 0.5),
+                frameon=False,
+                title="Network elements",
+                fontsize=9,
+                title_fontsize=10
+            )
+        elif LEGEND_STYLE == "inside":
+            ax.legend(
+                handles=legend_elements,
+                loc="upper left",
+                frameon=True,
+                fontsize=9,
+                title_fontsize=10
+            )
+        elif LEGEND_STYLE == "bottom":
+            ax.legend(
+                handles=legend_elements,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.05),
+                ncol=3,
+                frameon=False,
+                fontsize=9,
+                title_fontsize=10
+            )
+
+
+
+        # ---- Labels (hubs only) ----
+        hub_labels = {n: n for n in G.nodes() if roles[n] == "hub"}
         nx.draw_networkx_labels(
-            core_net,
+            G,
             pos,
-            ax=ax,
             labels=hub_labels,
-            font_size=9,
-            font_weight='bold'
+            font_size=10,
+            font_weight="bold",
         )
-        
-        plt.title('Protein-Protein Interaction Network\n(STRING confidence ≥ 0.700)',
-                 fontsize=16, fontweight='bold')
-        plt.axis('off')
+
+        ax.set_title("Protein–Protein Interaction Network\n(Hubs + First Neighbors)")
+        ax.axis("off")
+
+        annotation_text = (
+            "Hubs = top-degree proteins in STRING network\n"
+            "Connectors = first neighbors of hubs\n"
+            "Node size ∝ global degree\n"
+            "Edge width ∝ STRING confidence score"
+        )
+
+        ax.text(
+            0.01, 0.01,
+            annotation_text,
+            transform=ax.transAxes,
+            fontsize=9,
+            verticalalignment="bottom",
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8)
+        )
+
+        num_hubs = sum(1 for r in roles.values() if r == "hub")
+        num_connectors = sum(1 for r in roles.values() if r == "connector")
+
+        ax.text(
+            0.99, 0.01,
+            f"Hubs: {num_hubs}\nConnectors: {num_connectors}",
+            transform=ax.transAxes,
+            fontsize=9,
+            ha="right",
+            va="bottom"
+        )
+
+        out = os.path.join(self.output_dir, filename)
         plt.tight_layout()
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.savefig(out, dpi=300)
         plt.close()
-        
-        self.logger.info(f"✓ Basic visualization saved: {output_path}")
-        self.logger.info("  Pros: Simple, clean, publication-ready")
-        self.logger.info("  Cons: Static, limited customization")
-    
-    def create_colored_visualization(self, network, output_path):
-        """
-        Create colored visualization by node degree.
-        
-        Args:
-            network: NetworkX graph
-            output_path: Path to save image
-        """
-        self.logger.info("\n--- Creating Colored Network Visualization ---")
-        
-        fig, ax = plt.subplots(figsize=(10, 10))
-        
-        # Layout
-        core_net, degree_dict = self._get_top_hub_subgraph(network, top_n=25)
-        pos = nx.spring_layout(core_net, k=0.6, iterations=200, seed=42)
-        
-        # Node colors by degree
-        node_degrees = {n: degree_dict[n] for n in core_net.nodes()}
-        node_colors = [node_degrees[n] for n in core_net.nodes()]
-        
-        # Node sizes
-        raw_degrees = [degree_dict[n] for n in core_net.nodes()] # The duplication node_degrees and raw_degrees is intentional
 
-        min_node_size = 300
-        max_node_size = 1800
+        return out
 
-        min_deg = min(raw_degrees)
-        max_deg = max(raw_degrees)
+    # ------------------------------------------------------------------
+    # Interactive visualization (full network)
+    # ------------------------------------------------------------------
+    def create_interactive_network(self, network, filename="network_interactive.html"):
+        net = Network(height="750px", width="100%", bgcolor="white")
 
-        node_sizes = [
-            min_node_size
-            + (deg - min_deg) / (max_deg - min_deg) * (max_node_size - min_node_size)
-            if max_deg > min_deg else min_node_size
-            for deg in raw_degrees
-        ]
-        
-        # Edge widths
-        edge_weights = [
-            core_net[u][v].get('weight', 1) * 3 
-            for u, v in core_net.edges()
-            ]
-        
-        # Draw nodes
+        for n in network.nodes():
+            net.add_node(n, label=n)
 
-        nodes = nx.draw_networkx_nodes(
-            core_net, 
-            pos,
-            ax=ax,
-            node_size=node_sizes,
-            node_color=node_colors,
-            cmap=plt.cm.viridis,
-            edgecolors='black',
-            linewidths=2,
-            alpha=0.9
+        for u, v, d in network.edges(data=True):
+            w = d.get("weight", 1)
+            net.add_edge(u, v, value=w)
+
+        out = os.path.join(self.output_dir, filename)
+        net.write_html(out)
+        return out
+
+    # ------------------------------------------------------------------
+    # Entry point
+    # ------------------------------------------------------------------
+    def create_all_visualizations(self, network):
+        self.create_static_network(
+            network,
+            filename="network_static_hubs_connectors.png",
+            top_n=15,
         )
-
-        
-        sm = plt.cm.ScalarMappable(
-            cmap=plt.cm.viridis,
-            norm = plt.Normalize(
-                vmin=min(node_colors),
-                vmax=max(node_colors)
-            )
-        )
-        sm.set_array([])
-
-        cbar = fig.colorbar(sm, ax = ax)
-
-        nx.draw_networkx_edges(
-            core_net, 
-            pos,
-            ax=ax,
-            width=edge_weights,
-            alpha=0.5,
-            edge_color='gray'
-            )
-
-
-        
-        # Draw labels
-        hub_labels = {n: n for n in node_degrees if node_degrees[n] >= 10}
-
-        nx.draw_networkx_labels(
-            core_net, 
-            pos,
-            ax = ax,
-            labels = hub_labels,
-            font_size=9,
-            font_weight='bold'
-            )
-        
-        # Colorbar
-        plt.title('Protein-Protein Interaction Network\nColored by Node Degree',
-                 fontsize=16, fontweight='bold')
-        plt.axis('off')
-        plt.tight_layout()
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
-        plt.close()
-        
-        self.logger.info(f"✓ Colored visualization saved: {output_path}")
-        self.logger.info("  Pros: Shows hub proteins clearly, aesthetic")
-        self.logger.info("  Cons: Static, color scheme may not suit all publications")
-    
-    def create_interactive_visualization(self, network, output_path):
-        """
-        Create interactive HTML visualization using PyVis.
-        
-        Args:
-            network: NetworkX graph
-            output_path: Path to save HTML file
-        """
-        self.logger.info("\n--- Creating Interactive Network Visualization ---")
-        
-        # Create PyVis network
-        net = PyVisNetwork(height='750px', width='100%', bgcolor='#ffffff', font_color='black')
-        
-        # Convert NetworkX to PyVis
-        net.from_nx(network)
-        
-        # Customize appearance
-        net.set_options("""
-        {
-          "nodes": {
-            "font": {"size": 14, "face": "Arial"},
-            "scaling": {"min": 10, "max": 30}
-          },
-          "edges": {
-            "color": {"inherit": true},
-            "smooth": {"type": "continuous"}
-          },
-          "physics": {
-            "barnesHut": {
-              "gravitationalConstant": -30000,
-              "centralGravity": 0.3,
-              "springLength": 95
-            },
-            "minVelocity": 0.75
-          }
-        }
-        """)
-        
-        # Save
-        net.save_graph(output_path)
-        
-        self.logger.info(f"✓ Interactive visualization saved: {output_path}")
-        self.logger.info("  Pros: Interactive, zoomable, can explore connections")
-        self.logger.info("  Cons: Requires browser, not suitable for print publications")
-        self.logger.info(f"  💡 Open in browser: file://{os.path.abspath(output_path)}")
-    
-    def create_all_visualizations(self, network, output_dir):
-        """
-        Create all three types of visualizations.
-        
-        Args:
-            network: NetworkX graph
-            output_dir: Output directory
-        """
-        self.logger.info("\n" + "="*70)
-        self.logger.info("CREATING NETWORK VISUALIZATIONS")
-        self.logger.info("="*70)
-        
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Basic
-        basic_path = os.path.join(output_dir, "network_basic.png")
-        self.create_basic_visualization(network, basic_path)
-        
-        # Colored
-        colored_path = os.path.join(output_dir, "network_colored.png")
-        self.create_colored_visualization(network, colored_path)
-        
-        # Interactive
-        interactive_path = os.path.join(output_dir, "network_interactive.html")
-        self.create_interactive_visualization(network, interactive_path)
-        
-        self.logger.info("\n✓ All visualizations created successfully!")
-        self.logger.info("\n📊 Visualization Summary:")
-        self.logger.info(f"  1. Basic (PNG): {basic_path}")
-        self.logger.info(f"  2. Colored (PNG): {colored_path}")
-        self.logger.info(f"  3. Interactive (HTML): {interactive_path}")
+        self.create_interactive_network(network)

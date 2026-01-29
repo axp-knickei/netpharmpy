@@ -100,12 +100,12 @@ class NetworkVisualizer:
 
         # ---- Edges ----
         edge_widths = [
-            subgraph[u][v].get("weight", 1) * 2
-            for u, v in subgraph.edges()
+            G[u][v].get("weight", 1) * 2
+            for u, v in G.edges()
         ]
 
         nx.draw_networkx_edges(
-            subgraph,
+            G,
             pos,
             ax=ax,
             width=edge_widths,

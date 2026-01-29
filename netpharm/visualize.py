@@ -99,10 +99,13 @@ class NetworkVisualizer:
                 node_colors.append("#1f77b4")  # blue
 
         # ---- Edges ----
-        edge_widths = [G[u][v].get("weight", 1) * 2 for u, v in G.edges()]
+        edge_widths = [
+            subgraph[u][v].get("weight", 1) * 2
+            for u, v in subgraph.edges()
+        ]
 
         nx.draw_networkx_edges(
-            G,
+            subgraph,
             pos,
             ax=ax,
             width=edge_widths,

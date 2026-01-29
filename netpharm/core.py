@@ -199,7 +199,7 @@ class NetworkPharmacology:
             self.network_analyzer.save_results(step_dir)
             
             # Create visualizations
-            self.visualizer.create_all_visualizations(self.network, step_dir)
+            self.visualizer.create_all_visualizations(self.network)
             
             return self.network
     

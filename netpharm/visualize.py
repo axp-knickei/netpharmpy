@@ -31,10 +31,32 @@ class NetworkVisualizer:
 
         connectors = set()
         for h in hubs:
-            connectors.update(network.neighbors(h))
+            for n in network.neighbors(h):
+                connectors.add(n)
 
-        nodes_to_keep = set(hubs) | connectors
+        # --- enforce connector definition ---
+        valid_connectors = set()
+        for n in connectors:
+            # must connect to a hub
+            hub_edges = set(network.neighbors(n)) & set(hubs)
+            if not hub_edges:
+                continue
+
+            # must have >1 edge in subgraph (hub + at least one other)
+            if network.degree(n) < 2:
+                continue
+
+            valid_connectors.add(n)
+
+        nodes_to_keep = set(hubs) | valid_connectors
+
+        # --- induced subgraph ---
         subgraph = network.subgraph(nodes_to_keep).copy()
+
+        # --- remove isolated nodes (safety net) ---
+        isolated = list(nx.isolates(subgraph))
+        subgraph.remove_nodes_from(isolated)
+
 
         node_roles = {}
         for n in subgraph.nodes():

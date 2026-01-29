@@ -61,7 +61,7 @@ class NetworkPharmacology:
         self.pathway_analyzer = PathwayAnalyzer(self.logger)
         self.network_analyzer = NetworkAnalyzer(self.logger)
         self.enrichment_analyzer = EnrichmentAnalyzer(self.logger)
-        self.visualizer = NetworkVisualizer(self.logger)
+        self.visualizer = NetworkVisualizer(self.output_dir)
         
         # Data storage
         self.compound_data = None
@@ -169,12 +169,28 @@ class NetworkPharmacology:
             
             # Query STRING
             interactions = self.network_analyzer.query_string_network(
-                gene_list=network_genes,
+                network_genes, 
                 confidence=confidence
             )
-            
-            # Build network
+
+
+            # Build network FIRST
             self.network = self.network_analyzer.build_network()
+
+            # --- TEMP DEBUG ---
+            print("\n[DEBUG] Network object inspection")
+            print("Type:", type(self.network))
+            print("Is directed:", self.network.is_directed())
+            print("Nodes:", self.network.number_of_nodes())
+            print("Edges:", self.network.number_of_edges())
+
+            u, v, data = next(iter(self.network.edges(data=True)))
+            print("Example edge:", u, v, data)
+
+            n = next(iter(self.network.nodes()))
+            print("Example node:", n)
+            print("[DEBUG END]\n")
+
             
             # Analyze network
             metrics = self.network_analyzer.analyze_network()

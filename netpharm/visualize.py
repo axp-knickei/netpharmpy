@@ -2,12 +2,19 @@ import os
 import matplotlib.pyplot as plt
 import networkx as nx
 from pyvis.network import Network
-
+from pathlib import Path
 
 class NetworkVisualizer:
     def __init__(self, output_dir):
-        self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
+        if hasattr(output_dir, "info"):
+            raise TypeError(
+                "NetworkVisualizer received a Logger instead of a path. "
+                "Pass output_dir, not logger."
+            )
+
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
 
     # ------------------------------------------------------------------
     # Core graph abstraction

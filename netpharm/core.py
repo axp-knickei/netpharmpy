@@ -177,30 +177,34 @@ class NetworkPharmacology:
             # Build network FIRST
             self.network = self.network_analyzer.build_network()
 
-            # --- TEMP DEBUG ---
-            print("\n[DEBUG] Network object inspection")
-            print("Type:", type(self.network))
-            print("Is directed:", self.network.is_directed())
-            print("Nodes:", self.network.number_of_nodes())
-            print("Edges:", self.network.number_of_edges())
-
-            u, v, data = next(iter(self.network.edges(data=True)))
-            print("Example edge:", u, v, data)
-
-            n = next(iter(self.network.nodes()))
-            print("Example node:", n)
-            print("[DEBUG END]\n")
-
             
             # Analyze network
             metrics = self.network_analyzer.analyze_network()
+
+            print("METRICS KEYS:", metrics.keys())
+
+
+            # Extract hub nodes from `metrics`
+            TOP_N = 15
+
+            hub_nodes = (
+                metrics
+                .sort_values("Degree", ascending=False)
+                .head(TOP_N)["Protein"]
+                .tolist()
+            )
             
             # Save results
             self.network_analyzer.save_results(step_dir)
             
             # Create visualizations
-            self.visualizer.create_all_visualizations(self.network)
-            
+            self.visualizer.create_all_visualizations(
+                G=self.network,
+                hub_nodes=hub_nodes,
+                top_n=15,
+                label_connectors=False,
+            )
+
             return self.network
     
     def enrichment_analysis(self, method='gprofiler'):

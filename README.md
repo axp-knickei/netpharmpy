@@ -463,7 +463,7 @@ Because `analysis.py` only consumes saved outputs:
 
 This makes the workflow suitable for **iterative scientific reasoning**, peer review, and long-term maintenance.
 
-![Pipeline Architecture Diagram](Pipeline Architecture Diagram.png)
+![Pipeline Architecture Diagram](Pipeline_Architecture_Diagram.png)
 
 ---
 

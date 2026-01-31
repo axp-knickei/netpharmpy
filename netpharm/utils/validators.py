@@ -3,9 +3,10 @@ Input validation functions.
 """
 
 import re
+from typing import Union
 
 
-def validate_cid(cid):
+def validate_cid(cid: Union[str, int]) -> int:
     """
     Validate PubChem CID format.
     
@@ -27,7 +28,7 @@ def validate_cid(cid):
         raise ValueError(f"Invalid CID format: {cid}. Must be a positive integer.")
 
 
-def validate_smiles(smiles):
+def validate_smiles(smiles: str) -> str:
     """
     Basic SMILES format validation.
     
@@ -54,7 +55,11 @@ def validate_smiles(smiles):
     return smiles.strip()
 
 
-def validate_threshold(threshold, min_val=0.0, max_val=1.0):
+def validate_threshold(
+    threshold: float, 
+    min_val: float = 0.0, 
+    max_val: float = 1.0,
+) -> float:
     """
     Validate probability threshold.
     
@@ -72,13 +77,15 @@ def validate_threshold(threshold, min_val=0.0, max_val=1.0):
     try:
         threshold_float = float(threshold)
         if not min_val <= threshold_float <= max_val:
-            raise ValueError(f"Threshold must be between {min_val} and {max_val}")
+            raise ValueError(
+                f"Threshold must be between {min_val} and {max_val}"
+            )
         return threshold_float
     except (ValueError, TypeError):
         raise ValueError(f"Invalid threshold: {threshold}")
 
 
-def validate_pathway_id(pathway_id):
+def validate_pathway_id(pathway_id: str) -> str:
     """
     Validate Reactome pathway ID format.
     
@@ -92,7 +99,9 @@ def validate_pathway_id(pathway_id):
         ValueError: If pathway ID is invalid
     """
     # Reactome IDs format: R-HSA-XXXXXX or R-MMU-XXXXXX, etc.
-    pattern = r'^R-[A-Z]{3}-\d+$'
+    pattern = r"^R-[A-Z]{3}-\d+$"
     if not re.match(pattern, pathway_id):
-        raise ValueError(f"Invalid Reactome pathway ID format: {pathway_id}")
-    return pathway_id
+        raise ValueError(
+            f"Invalid Reactome pathway ID format: {pathway_id}"
+        )
+    return pathway_id, str

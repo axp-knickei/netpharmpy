@@ -8,9 +8,9 @@
 **Network pharmacology pipeline for drug discovery and target prediction.** Integrates Reactome pathway analysis, STRING protein-protein interaction networks, and multi-omics enrichment (GO/KEGG/Reactome). User-friendly Python framework for computational biologists with guided workflows and publication-ready outputs.
 
 
-[![pathway enrichment](paper_replication_results/compound_969516_20251216_163546/Figure_B_Adaptive/enrichment_bubble_grouped.png)]
+![pathway enrichment](paper_replication_results/compound_969516_20251216_163546/Figure_B_Adaptive/enrichment_bubble_grouped.png)
 
-[![string interaction](string_interactions.png)]
+![string interaction](string_interactions.png)
 
 ---
 
@@ -248,24 +248,21 @@ npharma.build_network(confidence=0.700)
 npharma.enrichment_analysis(method='gprofiler')
 ```
 ---
-## How to Read This Pipeline
+## 🔍 Pipeline Logic & Interpretation
 
-This pipeline is organized as a sequence of steps, but **each step serves a different purpose and uses a different type of reasoning**. The steps are **complementary**, not repetitive.
+The pipeline is organized as a sequence of steps, but **each step serves a different purpose**.
 
-In simple terms:
+| Step | Purpose | Question Answered |
+| :--- | :--- | :--- |
+| **1-2. Target Prediction** | Data Retrieval | *What are the potential targets?* |
+| **3. Pathway Analysis** | Biological Filtering | *Which targets are relevant to my specific system?* |
+| **4. Network Analysis** | Systems Context | *How do these proteins interact?* |
+| **5. Enrichment** | Statistical Interpretation | *What functions are statistically over-represented?* |
 
-* **Steps 1–2** gather *possible targets* for a compound.
-* **Step 3** applies **biological reasoning** to filter those targets to a relevant biological system (e.g., immune signaling).
-* **Step 4** provides **network context**, showing how the selected proteins interact as a system.
-* **Step 5** applies **statistical analysis** to describe which biological functions are over-represented in that system.
-
-Importantly:
-
-* **Step 3 is not a statistical test** — it is a biologically informed filtering step.
-* **Step 4 does not identify drug targets** — it describes system structure and connectivity.
-* **Step 5 does not validate mechanisms** — it statistically summarizes functional themes.
-
-These steps are intentionally separated to avoid conflating **mechanistic reasoning**, **network context**, and **statistical interpretation**. Together, they support **transparent and reproducible hypothesis generation**, not causal inference.
+**Key Distinctions:**
+* **Step 3 is not a statistical test** — it is a biologically informed filter to reduce noise.
+* **Step 4 does not identify drug targets** — it reveals the connectivity and structure of the system.
+* **Step 5 provides statistical support** — it tests for over-representation of functional themes.
 
 ---
 
@@ -288,31 +285,7 @@ Predicts potential protein targets using:
 
 **Manual workflow** with clear instructions for downloading results.
 
-### 🔍 Understanding the Role of Steps 3, 4, and 5
 
-Although Steps 3, 4, and 5 are executed sequentially, they serve **different conceptual purposes** and answer **different biological questions**. They should not be interpreted as redundant analyses.
-
-**In simple terms:**
-
-* **Step 3 answers *“Which targets are biologically relevant?”***
-* **Step 4 answers *“How do these targets behave as a system?”***
-* **Step 5 answers *“What biological functions are over-represented?”***
-
-Each step represents a **different type of reasoning**, as summarized below.
-
-| Step                               | Type of reasoning                  | Purpose                                                                                                                                                                                                                           |
-| ---------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Step 3 – Pathway Analysis**      | Biological / mechanistic filtering | Restricts predicted targets to those involved in user-selected biological pathways (e.g., immune signaling). This step reduces noise and focuses the analysis on biologically plausible mechanisms.                               |
-| **Step 4 – Network Analysis**      | Systems-level context              | Examines how the selected proteins interact with each other using protein–protein interaction networks. This step identifies highly connected proteins (network hubs) and reveals system structure, not statistical significance. |
-| **Step 5 – Functional Enrichment** | Statistical interpretation         | Tests whether specific biological functions or pathways are over-represented in the selected gene set compared to a background. This step provides statistical support for functional themes.                                     |
-
-Importantly:
-
-* **Step 3 is not a statistical test** — it is a biologically informed filtering step.
-* **Step 4 does not identify drug targets** — it provides network context.
-* **Step 5 does not validate mechanisms** — it highlights statistically enriched functional annotations.
-
-Together, these steps support **hypothesis generation**, not causal inference.
 
 ### Step 3: Pathway Analysis (Biological Filtering)
 
@@ -406,6 +379,91 @@ npharma.run_full_pipeline()
 ### Batch Analysis (Coming in v2.0)
 
 Feature planned for future release.
+
+## 🔍 Post-Pipeline Analysis (`analysis.py`)
+
+### What is `analysis.py`?
+
+`analysis.py` is a **post-pipeline analysis script** designed to interpret, summarize, and extend the results generated by the main network pharmacology pipeline (`main.py`).
+
+Importantly:
+
+* `analysis.py` **does not run the pipeline**
+* It **does not modify any results**
+* It **only consumes outputs** generated in the `outputs/` directory
+
+This strict separation ensures that **data generation, visualization, and interpretation are not conflated**, which is critical for reproducible and defensible scientific analysis.
+
+---
+
+### Why is `analysis.py` separated from the core pipeline?
+
+The pipeline is intentionally divided into conceptual layers:
+
+| Layer               | Purpose                                             | Scripts                            |
+| ------------------- | --------------------------------------------------- | ---------------------------------- |
+| **Data generation** | Retrieve, filter, and construct biological networks | `main.py`, `core.py`, `network.py` |
+| **Visualization**   | Render network structure for inspection and figures | `visualize.py`                     |
+| **Interpretation**  | Quantitative reasoning and result summarization     | `analysis.py`                      |
+
+This design avoids common pitfalls such as:
+
+* Mixing statistical interpretation with network construction
+* Hard-coding analytical assumptions into the pipeline
+* Making figures depend on undocumented logic
+
+---
+
+### What does `analysis.py` do?
+
+`analysis.py` operates on pipeline outputs such as:
+
+* `step4_network/network_metrics.csv`
+* `step4_network/string_interactions.csv`
+* `step3_pathways/overlapping_targets.csv`
+* (optionally) enrichment results from Step 5
+
+Typical analyses performed in `analysis.py` include:
+
+* Identifying and ranking **hub proteins**
+* Comparing **centrality measures** (degree, betweenness, closeness)
+* Inspecting **connector nodes** and local subnetworks
+* Supporting figure selection (e.g., top-N hubs)
+* Preparing tables or statistics for manuscripts
+
+All analytical decisions are **explicit and script-level**, making them easy to review, revise, or justify.
+
+---
+
+### How to use `analysis.py`
+
+After running the pipeline with:
+
+```bash
+uv run python main.py --config config.yaml
+```
+
+Run post-analysis with:
+
+```bash
+uv run python analysis.py --output_dir ./outputs/compound_XXXX
+```
+
+`analysis.py` will read existing CSV files and produce summaries or reports **without re-running the pipeline**.
+
+---
+
+### Reproducibility note
+
+Because `analysis.py` only consumes saved outputs:
+
+* Results can be re-analyzed without re-querying external databases
+* Analytical choices can be changed without affecting raw data
+* Multiple analysis strategies can be tested on the same results
+
+This makes the workflow suitable for **iterative scientific reasoning**, peer review, and long-term maintenance.
+
+![Pipeline Architecture Diagram](Pipeline Architecture Diagram.png)
 
 ---
 
@@ -589,4 +647,4 @@ Report bugs or request features: [GitHub Issues](https://github.com/axp-knickei/
 
 ---
 
-*Last updated: December 28, 2025*
+*Last updated: January 31, 2026*

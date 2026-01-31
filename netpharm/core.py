@@ -181,9 +181,6 @@ class NetworkPharmacology:
             # Analyze network
             metrics = self.network_analyzer.analyze_network()
 
-            print("METRICS KEYS:", metrics.keys())
-
-
             # Extract hub nodes from `metrics`
             TOP_N = 15
 
@@ -260,8 +257,8 @@ class NetworkPharmacology:
             
             # Step 4: Network analysis
             confidence = self.config.get('string', {}).get('confidence', 0.700)
-            # CHANGE: Use scope='all' to generate the full complex network
-            self.build_network(confidence=confidence, scope="all")
+            scope = self.config.get('network', {}).get('scope', 'all')
+            self.build_network(confidence=confidence, scope=scope)
             
             # Step 5: Enrichment
             enrichment_method = self.config.get('enrichment', {}).get('method', 'gprofiler')

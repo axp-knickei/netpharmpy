@@ -1,0 +1,8 @@
+gene_name,docking_score,pdb_id,note
+DYRK2,-210.0,5Z72,Reference
+MAPK1,-220.5,4ZZZ,Strong binder
+AKT1,-215.0,3QKK,Strong binder
+TNF,-180.0,1TNF,Weak binder
+IL6,-190.5,1ALU,Weak binder
+CD19,-245.5,6AL5,Very strong binder
+EGFR,-200.0,1IVO,Weak binder

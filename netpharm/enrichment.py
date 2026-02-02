@@ -20,13 +20,14 @@ class EnrichmentAnalyzer:
         self.logger = logger
         self.enrichment_results = None
     
-    def analyze_david_manual(self, gene_list, output_dir="./data"):
+    def analyze_david_manual(self, gene_list, output_dir="./data", non_interactive=False):
         """
         Guide user through manual DAVID enrichment.
         
         Args:
             gene_list: List of gene names
             output_dir: Directory for downloaded files
+            non_interactive: If True, bypasses the input() wait.
         
         Returns:
             dict: Enrichment statistics
@@ -70,7 +71,10 @@ class EnrichmentAnalyzer:
         self.logger.info("   - Multiple testing correction: Default (Benjamini)")
         self.logger.info("   - Background: Whole genome")
         
-        input("\n⏸ Press ENTER after downloading DAVID results...")
+        if not non_interactive:
+            input("\n⏸ Press ENTER after downloading DAVID results...")
+        else:
+            self.logger.info("\n[Non-interactive] Skipping user input wait...")
         
         # Try to load results
         stats = {'files_loaded': []}

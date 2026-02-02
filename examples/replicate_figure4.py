@@ -16,6 +16,12 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from netpharm.docking.processor import DockingProcessor
 from netpharm.docking.plots import plot_delta_scores, plot_enrichment_bubble
+from netpharm.docking.adapters import parse_david_results
+from netpharm.enrichment import EnrichmentAnalyzer
+
+from netpharm.docking.processor import DockingProcessor
+from netpharm.docking.plots import plot_delta_scores, plot_enrichment_bubble
+from netpharm.docking.adapters import parse_david_results
 from netpharm.enrichment import EnrichmentAnalyzer
 
 # Simple logger for standalone script
@@ -31,6 +37,7 @@ def main():
     
     # 1. Setup paths
     data_path = Path("data/reproduction/figure4_scores.csv")
+    david_data_path = Path("data/reproduction/david_results") # Pre-calculated/Mock results
     
     print(f"--- Loading Docking Data from {data_path} ---")
     processor = DockingProcessor(data_path)
@@ -58,30 +65,42 @@ def main():
         reference_gene="DYRK2"
     )
     
-    # 5. Enrichment Analysis (Figure 4B)
-    print("\n--- Running Enrichment Analysis (g:Profiler) ---")
+    # 5. Enrichment Analysis (DAVID)
+    print("\n--- Running Enrichment Analysis (DAVID) ---")
     logger = SimpleLogger()
     enricher = EnrichmentAnalyzer(logger)
     
-    # Only run if we have targets
     if targets:
+        # A. Generate the gene list for the user
+        print("\n[Action] Generating gene list for DAVID...")
+        # Use non_interactive=True to avoid blocking in automated script
+        enricher.analyze_david_manual(
+            targets, 
+            output_dir=output_dir / "david_input",
+            non_interactive=True
+        )
+        
+        # B. Parse Results (Simulating the user having run DAVID and saved files)
+        print(f"\n[Mock] Loading pre-calculated MOCK DAVID results from {david_data_path}...")
         try:
-            # Analyze using the filtered high-affinity targets
-            enrichment_results = enricher.analyze_gprofiler(targets)
+            enrichment_results = parse_david_results(david_data_path, prefix="mock_")
             
-            # Plot Bubble Chart
-            print("\n--- Generating Figure 4B (Enrichment Bubble) ---")
-            plot_enrichment_bubble(
-                enrichment_results,
-                output_path=output_dir / "figure_4b_enrichment_bubble.png",
-                top_n=15
-            )
+            if not enrichment_results.empty:
+                print(f"Loaded {len(enrichment_results)} significant terms.")
+                
+                # C. Plot Bubble Chart
+                print("\n--- Generating Figure 4B (Enrichment Bubble) ---")
+                plot_enrichment_bubble(
+                    enrichment_results,
+                    output_path=output_dir / "figure_4b_enrichment_bubble.png",
+                    top_n=15
+                )
+            else:
+                print("No significant enrichment terms found in DAVID files.")
+                
+        except Exception as e:
+            print(f"Error processing DAVID results: {e}")
             
-            # Save CSV results too
-            enricher.save_results(output_dir / "enrichment_results")
-            
-        except SystemExit:
-            print("Enrichment failed (likely no significant terms found for small gene list).")
     else:
         print("No high affinity targets found. Skipping enrichment.")
 

@@ -449,7 +449,25 @@ Run post-analysis with:
 uv run python analysis.py --output_dir ./outputs/compound_XXXX
 ```
 
-`analysis.py` will read existing CSV files and produce summaries or reports **without re-running the pipeline**.
+`analysis.py` will read existing CSV files and produce summaries, reports, and publication-quality figures **without re-running the pipeline**.
+
+---
+
+### Understanding Bipartite Network Figures
+
+The `analysis.py` script generates two specialized bipartite networks connecting **Hub Proteins** (circles) to **Reactome Pathways** (squares). These figures use the Nature Publishing Group (NPG) color scheme and provide different topological perspectives:
+
+#### 1. Betweenness Centrality (`hub_pathway_bipartite_betweenness.png`)
+*   **Node Size ∝ Betweenness Centrality**: Larger protein nodes represent **strategic bottlenecks** in the global interaction network.
+*   **Scientific Significance**: These proteins act as critical bridges that control the flow of biological information. Targeting these "bottlenecks" often leads to the most significant disruption of the disease-related network.
+
+#### 2. Global Degree (`hub_pathway_bipartite_global_degree.png`)
+*   **Node Size ∝ Global Degree**: Larger protein nodes represent **major cellular hubs** with the highest total number of interactions in the full STRING database.
+*   **Scientific Significance**: These are the "promiscuous" proteins of the cell. While they are central to biology, high-degree hubs can sometimes be associated with a higher risk of off-target effects if inhibited.
+
+#### Common Visual Elements:
+*   **Coloring**: **Dark Blue** nodes are multi-pathway hubs (pleiotropic), while **Light Blue** nodes connect to a single pathway in the current view.
+*   **Edges**: Smooth S-curves connect proteins to their respective pathways. **Thicker lines** highlight connections from multi-pathway proteins, emphasizing their functional versatility.
 
 ---
 
@@ -594,12 +612,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📊 Project Status
 
 ![Development Status](https://img.shields.io/badge/status-active-success.svg)
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18074031.svg)](https://doi.org/10.5281/zenodo.18074031)
 
-### Current Version: 0.1.0
+### Current Version: 0.1.2
 
-**Release Date:** December 2025
+**Release Date:** February 2026
 
 ### Features
 

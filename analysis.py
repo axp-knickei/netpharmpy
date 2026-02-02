@@ -39,7 +39,7 @@ def ensure_dir(path: Path):
 
 
 # ---------------------------------------------------------------------
-# Network-level analyses
+# Network metrics analyses
 # ---------------------------------------------------------------------
 
 def load_network_metrics(metrics_csv: Path) -> pd.DataFrame:
@@ -56,7 +56,7 @@ def load_network_metrics(metrics_csv: Path) -> pd.DataFrame:
     }
     missing = required_cols - set(df.columns)
     if missing:
-        raise ValueError(f"Missing required columns: {missing}")
+        raise ValueError(f"Missing required columns in netrowk metrics: {missing}")
     return df
 
 
@@ -121,7 +121,7 @@ def load_string_interactions(interactions_csv: Path) -> pd.DataFrame:
     }
     missing = required_cols - set(df.columns)
     if missing:
-        raise ValueError(f"Missing required columns: {missing}")
+        raise ValueError(f"Missing required columns in STRING interaction: {missing}")
     return df
 
 
@@ -146,6 +146,389 @@ def plot_interaction_score_distribution(
     plt.title("Distribution of STRING interaction confidence")
     plt.tight_layout()
     plt.savefig(output_path, dpi=DEFAULT_FIG_DPI)
+    plt.close()
+
+# ---------------------------------------------------------------------
+# Hub–Reactome pathway overlap analysis  (NEW)
+# ---------------------------------------------------------------------
+
+def map_hubs_to_reactome(
+    network_metrics_csv: Path,
+    pathway_proteins_csv: Path,
+    output_csv: Path,
+    top_n: int,
+):
+    """
+    Map top-N hub proteins to Reactome pathways.
+
+    Produces a table listing Reactome pathways that contain
+    hub proteins, along with hub counts per pathway.
+    """
+
+    # Load inputs
+    metrics_df = pd.read_csv(network_metrics_csv)
+    pathway_df = pd.read_csv(pathway_proteins_csv)
+
+    # Identify top-N hubs by degree
+    top_hubs = (
+        metrics_df
+        .sort_values("Degree", ascending=False)
+        .head(top_n)["Protein"]
+        .tolist()
+    )
+
+    # Filter pathway membership to hub proteins only
+    hub_pathways = pathway_df[pathway_df["gene_name"].isin(top_hubs)]
+
+    # Aggregate per pathway
+    records = []
+    for (pid, pname), group in hub_pathways.groupby(
+        ["pathway_id", "pathway_name"]
+    ):
+        hubs = sorted(group["gene_name"].unique())
+        records.append({
+            "Reactome_Pathway_ID": pid,
+            "Reactome_Pathway_Name": pname,
+            "Hub_Proteins": "; ".join(hubs),
+            "Hub_Count": len(hubs),
+        })
+
+    result_df = (
+        pd.DataFrame(records)
+        .sort_values("Hub_Count", ascending=False)
+    )
+
+    result_df.to_csv(output_csv, index=False)
+
+
+def plot_hub_pathway_bipartite(
+    overlap_csv: Path,
+    network_metrics_csv: Path,
+    output_path: Path,
+    sizing_column: str = "Betweenness_Centrality", # 'Betweenness_Centrality' or 'Degree'
+    sizing_label: str = "Betweenness",
+    max_pathways: int = 10,
+):
+    """
+    Create a publication-quality bipartite graph (Nature-style).
+    
+    Features:
+    - NPG (Nature Publishing Group) Color Palette
+    - Nodes sized by specific network metrics (Betweenness or Global Degree)
+    - Smooth Bezier curves for edges
+    """
+    import matplotlib.patches as mpatches
+    from matplotlib.path import Path as MplPath
+    import matplotlib.patches as patches
+
+    # 1. Load Data
+    df = pd.read_csv(overlap_csv)
+    df = df.sort_values("Hub_Count", ascending=False).head(max_pathways)
+    
+    metrics_df = pd.read_csv(network_metrics_csv)
+    # Create a mapping from Protein to the sizing metric
+    if sizing_column not in metrics_df.columns:
+        raise ValueError(f"Column {sizing_column} not found in metrics CSV.")
+    
+    # Normalize the metric for sizing (Min-Max scaling)
+    # Handle case where all values are same to avoid div by zero
+    min_val = metrics_df[sizing_column].min()
+    max_val = metrics_df[sizing_column].max()
+    denom = max_val - min_val if max_val > min_val else 1.0
+    
+    metric_map = {}
+    for _, row in metrics_df.iterrows():
+        norm_val = (row[sizing_column] - min_val) / denom
+        metric_map[row["Protein"]] = norm_val
+
+    # 2. Build Graph
+    B = nx.Graph()
+    pathways = df["Reactome_Pathway_Name"].tolist()
+    hubs = set()
+    edges = []
+    
+    for _, row in df.iterrows():
+        p_name = row["Reactome_Pathway_Name"]
+        p_hubs = [h.strip() for h in row["Hub_Proteins"].split(";")]
+        for h in p_hubs:
+            hubs.add(h)
+            edges.append((h, p_name))
+
+    hubs = sorted(list(hubs))
+    B.add_nodes_from(hubs, bipartite=0)
+    B.add_nodes_from(pathways, bipartite=1)
+    B.add_edges_from(edges)
+
+    # 3. Layout Optimization (Barycenter)
+    pathway_y = {p: i / (len(pathways) - 1) if len(pathways) > 1 else 0.5 
+                 for i, p in enumerate(pathways)}
+    
+    hub_y_score = {}
+    for h in hubs:
+        connected_pathways = [n for n in B.neighbors(h) if n in pathway_y]
+        if connected_pathways:
+            avg_y = sum(pathway_y[p] for p in connected_pathways) / len(connected_pathways)
+            hub_y_score[h] = avg_y
+        else:
+            hub_y_score[h] = 0.5
+
+    hubs_sorted = sorted(hubs, key=lambda h: hub_y_score[h])
+
+    pos = {}
+    for i, h in enumerate(hubs_sorted):
+        y = i / (len(hubs) - 1) if len(hubs) > 1 else 0.5
+        y = 0.1 + y * 0.8  
+        pos[h] = (-1, y)
+    
+    for i, p in enumerate(pathways):
+        y = i / (len(pathways) - 1) if len(pathways) > 1 else 0.5
+        y = 0.1 + y * 0.8
+        pos[p] = (1, y)
+
+    # 4. Plotting
+    plt.figure(figsize=(12, 8))
+    ax = plt.gca()
+
+    # NPG Color Palette (Nature Publishing Group)
+    HUB_COLOR_MULTI = "#3C5488"   # NPG Dark Blue
+    HUB_COLOR_SINGLE = "#4DBBD5"  # NPG Light Blue/Teal
+    PATH_COLOR = "#E64B35"        # NPG Red
+    EDGE_COLOR = "#BDBDBD"        # Neutral Gray
+    FONT_FAMILY = "sans-serif"
+    
+    # Draw Curved Edges
+    for u, v in B.edges():
+        hub_node = u if u in hubs_sorted else v
+        is_multi = B.degree(hub_node) > 1
+        
+        width = 2.5 if is_multi else 0.8
+        alpha = 0.6 if is_multi else 0.3
+        
+        x1, y1 = pos[u]
+        x2, y2 = pos[v]
+        
+        dist = abs(x2 - x1)
+        path_data = [
+            (MplPath.MOVETO, (x1, y1)),
+            (MplPath.CURVE4, (x1 + dist/2, y1)), 
+            (MplPath.CURVE4, (x2 - dist/2, y2)), 
+            (MplPath.CURVE4, (x2, y2)),          
+        ]
+        
+        codes, verts = zip(*path_data)
+        path = MplPath(verts, codes)
+        patch = patches.PathPatch(
+            path, 
+            facecolor='none', 
+            edgecolor=EDGE_COLOR, 
+            lw=width, 
+            alpha=alpha,
+            zorder=1
+        )
+        ax.add_patch(patch)
+
+    # Draw Hub Nodes
+    hub_colors = [
+        HUB_COLOR_MULTI if B.degree(h) > 1 else HUB_COLOR_SINGLE 
+        for h in hubs_sorted
+    ]
+    
+    # Sizing based on the passed metric (normalized 0-1)
+    # Range: 200 (min) to 1000 (max)
+    hub_sizes = []
+    for h in hubs_sorted:
+        norm_val = metric_map.get(h, 0.1) # Default to small if missing
+        size = norm_val * 800 + 200 
+        hub_sizes.append(size)
+    
+    nx.draw_networkx_nodes(
+        B, pos, nodelist=hubs_sorted,
+        node_color=hub_colors,
+        node_size=hub_sizes,
+        alpha=1.0,
+        edgecolors="white",
+        linewidths=1.5
+    )
+
+    # Draw Pathway Nodes
+    # Sizing by local degree (connections in this plot)
+    path_sizes = [B.degree(p) * 50 + 500 for p in pathways]
+    nx.draw_networkx_nodes(
+        B, pos, nodelist=pathways,
+        node_color=PATH_COLOR,
+        node_shape="s",
+        node_size=path_sizes,
+        alpha=1.0,
+        edgecolors="white",
+        linewidths=1.5
+    )
+
+    # Labels
+    for h in hubs_sorted:
+        x, y = pos[h]
+        ax.text(
+            x - 0.05, y, h,
+            fontsize=10,
+            fontfamily=FONT_FAMILY,
+            fontweight="bold",
+            color="#333333",
+            ha="right",
+            va="center"
+        )
+
+    for p in pathways:
+        x, y = pos[p]
+        label_text = p if len(p) < 40 else p[:37] + "..."
+        ax.text(
+            x + 0.05, y, label_text,
+            fontsize=10,
+            fontfamily=FONT_FAMILY,
+            color="#333333",
+            ha="left",
+            va="center"
+        )
+
+    # Legend
+    plt.axis("off")
+    legend_elements = [
+        mpatches.Patch(facecolor=HUB_COLOR_MULTI, edgecolor='white', label='Multi-Pathway Hub'),
+        mpatches.Patch(facecolor=HUB_COLOR_SINGLE, edgecolor='white', label='Single-Pathway Hub'),
+        mpatches.Patch(facecolor=PATH_COLOR, edgecolor='white', label='Reactome Pathway'),
+        # Add sizing text to legend title or separate entry?
+        # Let's add a dummy invisible patch with the label
+        mpatches.Patch(color='none', label=f'Node Size ∝ {sizing_label}')
+    ]
+    ax.legend(
+        handles=legend_elements,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.08), # moved slightly up
+        ncol=4, # 4 cols now
+        frameon=False,
+        fontsize=9
+    )
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_enrichment_triptych(
+    go_csv: Path,
+    kegg_csv: Path,
+    reac_csv: Path,
+    output_path: Path,
+    top_n: int = 10,
+):
+    """
+    Create a combined 'Triptych' figure of functional enrichment.
+    
+    Layout: [ GO:BP ] [ KEGG ] [ Reactome ]
+    - Bar Length: -log10(Adjusted P-value) (Significance)
+    - Bar Color: Gene Ratio (Intersection / Term Size) (Pathway Coverage)
+    """
+    import matplotlib.colors as mcolors
+    import matplotlib.cm as cm
+
+    # Setup data sources
+    # NOTE: We prioritize 'Biological Process' (BP) for the GO category because it provides 
+    # the most actionable physiological context for drug mechanisms. While 'Cellular Component' (CC) 
+    # and 'Molecular Function' (MF) are often available, they frequently yield more generic 
+    # terms (e.g., 'protein binding' or 'cytoplasm') that offer less mechanistic insight.
+    sources = [
+        {"name": "GO: Biological Process", "path": go_csv, "color_map": "Oranges", "base_color": "#E69F00"},
+        {"name": "KEGG Pathways", "path": kegg_csv, "color_map": "GnBu", "base_color": "#009E73"},
+        {"name": "Reactome Pathways", "path": reac_csv, "color_map": "Purples", "base_color": "#CC79A7"},
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=(20, 8), sharex=False)
+    plt.subplots_adjust(wspace=0.4) # Add space for long labels
+
+    # Shared aesthetics
+    FONT_FAMILY = "sans-serif"
+    
+    # Helper for wrapping text
+    import textwrap
+    def wrap_labels(labels, width=23):
+        wrapped = []
+        for label in labels:
+            if len(label) > width:
+                # Wrap and join with newline
+                wrapped.append("\n".join(textwrap.wrap(label, width)))
+            else:
+                wrapped.append(label)
+        return wrapped
+
+    for ax, source in zip(axes, sources):
+        if not source["path"].exists():
+            ax.text(0.5, 0.5, f"No data for\n{source['name']}", 
+                    ha='center', va='center', transform=ax.transAxes)
+            ax.axis('off')
+            continue
+
+        df = pd.read_csv(source["path"])
+        if df.empty:
+            ax.text(0.5, 0.5, f"No significant terms\n{source['name']}", 
+                    ha='center', va='center', transform=ax.transAxes)
+            ax.axis('off')
+            continue
+            
+        # Filter and Sort
+        # Sort by p-value (most significant first)
+        df = df.sort_values("Adjusted_P_value", ascending=True).head(top_n)
+        # Reverse for plotting (top to bottom)
+        df = df.iloc[::-1]
+
+        # Calculate metrics
+        df["log_p"] = -np.log10(df["Adjusted_P_value"])
+        # Use Recall (Intersection/Term_Size) as Gene Ratio for coloring
+        df["gene_ratio"] = df["Recall"] 
+
+        # Normalize colors
+        norm = mcolors.Normalize(vmin=df["gene_ratio"].min(), vmax=df["gene_ratio"].max())
+        cmap = plt.get_cmap(source["color_map"])
+        bar_colors = cmap(norm(df["gene_ratio"]))
+
+        # Plot Bars
+        bars = ax.barh(
+            y=range(len(df)),
+            width=df["log_p"],
+            color=bar_colors,
+            edgecolor="none",
+            height=0.6
+        )
+
+        # Labels
+        ax.set_yticks(range(len(df)))
+        
+        # Wrap labels
+        raw_labels = df["Term_Name"].tolist()
+        wrapped_labels = wrap_labels(raw_labels, width=23)
+        
+        ax.set_yticklabels(wrapped_labels, fontsize=10, fontfamily=FONT_FAMILY) # Slightly smaller font
+        ax.set_xlabel("-log10(Adj. P-value)", fontsize=10, fontfamily=FONT_FAMILY, fontweight='bold')
+        ax.set_title(source["name"], fontsize=14, fontfamily=FONT_FAMILY, fontweight='bold', pad=15)
+        
+        # Custom Grid
+        ax.xaxis.grid(True, linestyle='--', alpha=0.5, color='gray')
+        ax.set_axisbelow(True)
+        
+        # Remove top/right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color('#333333')
+        ax.spines['bottom'].set_color('#333333')
+
+        # Add Colorbar for this subplot (Gene Ratio)
+        # Reduced size: 75% of previous width (0.35 -> 0.26)
+        cax = ax.inset_axes([0.65, 0.05, 0.26, 0.03]) 
+        cb = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal')
+        cb.set_label('Gene Ratio', fontsize=7) # Smaller font
+        cb.ax.tick_params(labelsize=6) # Smaller ticks
+
+    plt.suptitle("Functional Landscape Analysis", fontsize=18, fontweight='bold', y=0.98)
+    # Tight layout rect helps avoid suptitle overlap
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -192,7 +575,7 @@ def plot_top_enriched_terms(
 
 def run_analysis(output_dir: Path):
     """
-    Run all post-hoc analyses.
+    Run all post-hoc analyses on pipeline outputs.
     """
     analysis_dir = output_dir / "analysis"
     figures_dir = analysis_dir / "figures"
@@ -233,6 +616,90 @@ def run_analysis(output_dir: Path):
     plot_interaction_score_distribution(
         interactions_df,
         figures_dir / "string_score_distribution.png",
+    )
+
+    # ---------------------------
+    # Hub–Reactome overlap (NEW)
+    # ---------------------------
+    overlap_csv = tables_dir / "hub_reactome_overlap.csv"
+    map_hubs_to_reactome(
+        network_metrics_csv=metrics_csv,
+        pathway_proteins_csv=output_dir / "step3_pathways" / "pathway_proteins.csv",
+        output_csv=overlap_csv,
+        top_n=TOP_N_HUBS,
+    )
+
+    # Plot 1: Sized by Betweenness Centrality
+    plot_hub_pathway_bipartite(
+        overlap_csv=overlap_csv,
+        network_metrics_csv=metrics_csv,
+        output_path=figures_dir / "hub_pathway_bipartite_betweenness.png",
+        sizing_column="Betweenness_Centrality",
+        sizing_label="Betweenness",
+        max_pathways=10,
+    )
+    
+    # Plot 2: Sized by Global Degree
+    plot_hub_pathway_bipartite(
+        overlap_csv=overlap_csv,
+        network_metrics_csv=metrics_csv,
+        output_path=figures_dir / "hub_pathway_bipartite_global_degree.png",
+        sizing_column="Degree",
+        sizing_label="Global Degree",
+        max_pathways=10,
+    )
+
+    # ---------------------------
+    # Functional Enrichment Plots
+    # ---------------------------
+    enrich_dir = output_dir / "step5_enrichment"
+    
+    # GO Biological Process
+    go_bp_csv = enrich_dir / "gprofiler_go_bp.csv"
+    if go_bp_csv.exists():
+        go_bp_df = load_enrichment_table(go_bp_csv)
+        if not go_bp_df.empty:
+            plot_top_enriched_terms(
+                go_bp_df,
+                figures_dir / "enrichment_go_bp.png",
+                term_col="Term_Name",
+                pval_col="Adjusted_P_value",
+                title="Top Enriched GO Biological Processes",
+            )
+
+    # KEGG Pathways
+    kegg_csv = enrich_dir / "gprofiler_kegg.csv"
+    if kegg_csv.exists():
+        kegg_df = load_enrichment_table(kegg_csv)
+        if not kegg_df.empty:
+            plot_top_enriched_terms(
+                kegg_df,
+                figures_dir / "enrichment_kegg.png",
+                term_col="Term_Name",
+                pval_col="Adjusted_P_value",
+                title="Top Enriched KEGG Pathways",
+            )
+
+    # Reactome Pathways (gProfiler results)
+    reac_csv = enrich_dir / "gprofiler_reac.csv"
+    if reac_csv.exists():
+        reac_df = load_enrichment_table(reac_csv)
+        if not reac_df.empty:
+            plot_top_enriched_terms(
+                reac_df,
+                figures_dir / "enrichment_reactome.png",
+                term_col="Term_Name",
+                pval_col="Adjusted_P_value",
+                title="Top Enriched Reactome Pathways",
+            )
+    
+    # Combined Triptych Figure
+    plot_enrichment_triptych(
+        go_csv=go_bp_csv,
+        kegg_csv=kegg_csv,
+        reac_csv=reac_csv,
+        output_path=figures_dir / "enrichment_landscape_triptych.png",
+        top_n=10
     )
 
     print("✓ analysis.py completed successfully")

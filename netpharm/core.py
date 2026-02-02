@@ -215,6 +215,12 @@ class NetworkPharmacology:
         # Get gene list
         gene_list = self.overlapping_targets['gene_name'].unique().tolist()
         
+        # Check for DAVID automation request in config
+        if self.config.get('enrichment', {}).get('run_david'):
+            email = self.config.get('enrichment', {}).get('david_email')
+            david_dir = os.path.join(step_dir, "david")
+            self.enrichment_analyzer.run_david_service(gene_list, david_dir, email)
+        
         if method == 'david':
             data_dir = os.path.join(self.output_dir, "data")
             stats = self.enrichment_analyzer.analyze_david_manual(

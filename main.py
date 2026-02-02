@@ -46,11 +46,32 @@ For documentation, visit: [Your GitHub URL]
         help='Base output directory (default: ./outputs)'
     )
     
+    # DAVID Integration Arguments
+    parser.add_argument(
+        '--run_david',
+        action='store_true',
+        help='Run DAVID functional enrichment (requires registered email)'
+    )
+    
+    parser.add_argument(
+        '--david_email',
+        type=str,
+        help='Email address registered with DAVID Web Service'
+    )
+    
     args = parser.parse_args()
     
     try:
         # Get configuration (file or interactive)
         config = get_config(args.config)
+        
+        # Inject DAVID settings into config
+        if args.run_david:
+            if 'enrichment' not in config:
+                config['enrichment'] = {}
+            config['enrichment']['run_david'] = True
+            if args.david_email:
+                config['enrichment']['david_email'] = args.david_email
         
         # Extract compound info
         compound_config = config.get('compound', {})

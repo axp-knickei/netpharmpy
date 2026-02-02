@@ -70,7 +70,7 @@ class NetworkPharmacology:
         self.network = None
         
         self.logger.info("\n" + "="*70)
-        self.logger.info("NETWORK PHARMACOLOGY ANALYSIS PIPELINE v1.0.0")
+        self.logger.info("NETWORK PHARMACOLOGY ANALYSIS PIPELINE v0.1.2")
         self.logger.info("="*70)
         self.logger.info(f"Output directory: {self.output_dir}")
         self.logger.info(f"Compound identifier: {self.compound_id}")

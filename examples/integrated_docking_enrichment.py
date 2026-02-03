@@ -1,5 +1,5 @@
 """
-replicate_figure4.py
+integrated_docking_enrichment.py
 
 Script to reproduce the logic of Figure 4:
 1. Load docking scores.

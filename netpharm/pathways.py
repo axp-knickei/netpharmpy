@@ -5,7 +5,11 @@ Reactome pathway analysis and target overlap identification.
 import pandas as pd
 import os
 import time
-from .utils.api_wrappers import query_reactome, get_pathway_proteins
+from .utils.api_wrappers import (
+    PathwayProteinFetchError,
+    query_reactome,
+    get_pathway_proteins,
+)
 from .utils.validators import validate_pathway_id
 
 
@@ -178,6 +182,15 @@ class PathwayAnalyzer:
                         self.logger.warning(f"    No proteins found for this pathway")
                         break
                         
+                except PathwayProteinFetchError as e:
+                    self.logger.error(
+                        "      Failed to fetch proteins for %s: %s", pathway_id, str(e)
+                    )
+                    self.logger.error(
+                        "      Reactome pathway protein retrieval failed; "
+                        "check your network connection or try again later."
+                    )
+                    break
                 except ConnectionError as e:
                     if attempt < max_retries - 1:
                         self.logger.warning(f"      Connection error (attempt {attempt + 1}/{max_retries})")

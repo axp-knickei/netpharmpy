@@ -2,9 +2,17 @@
 API wrapper functions for external services.
 """
 
+import logging
 import requests
 import time
 from typing import List, Dict, Optional
+
+
+logger = logging.getLogger(__name__)
+
+
+class PathwayProteinFetchError(RuntimeError):
+    """Raised when Reactome pathway protein retrieval fails."""
 
 
 def query_pubchem(cid=None, smiles=None):
@@ -111,67 +119,95 @@ def get_pathway_proteins(pathway_id):
     try:
         response = requests.get(url, timeout=30)
         time.sleep(0.5)
-        
+
+        if response.status_code != 200:
+            logger.error(
+                "Reactome pathway protein request failed "
+                "for pathway_id=%s url=%s status_code=%s",
+                pathway_id,
+                url,
+                response.status_code,
+            )
+            raise PathwayProteinFetchError(
+                f"Reactome returned status {response.status_code} for pathway {pathway_id}"
+            )
+
         proteins = []
-        if response.status_code == 200:
-            data = response.json()
-            
-            # Iterate through the physical entities (PEs)
-            for pe in data:
-                # UniProt info is nested inside 'refEntities'
-                ref_entities = pe.get('refEntities', [])
-                if not ref_entities:
-                    continue
-                    
-                for ref in ref_entities:
-                    # Robustly check if this is a UniProt entry
-                    # The API response often omits 'databaseName', so we check multiple fields
-                    is_uniprot = False
-                    if ref.get('databaseName') == 'UniProt':
-                        is_uniprot = True
-                    elif ref.get('schemaClass') in ['ReferenceGeneProduct', 'ReferenceIsoform']:
-                        is_uniprot = True
-                    elif str(ref.get('stId', '')).startswith('uniprot:'):
-                        is_uniprot = True
-                    elif str(ref.get('displayName', '')).startswith('UniProt:'):
-                        is_uniprot = True
-                        
-                    if is_uniprot:
-                        # 1. Extract UniProt ID
-                        uniprot_id = ref.get('identifier', 'N/A')
-                        
-                        # 2. Extract Gene Name (try multiple sources)
-                        gene_name = None
-                        
-                        # Try explicit geneName list in refEntity
-                        if 'geneName' in ref and ref['geneName']:
-                            gene_name = ref['geneName'][0]
-                        
-                        # Try parsing refEntity displayName (e.g., "UniProt:P07333 CSF1R")
-                        if not gene_name and 'displayName' in ref:
-                            parts = ref['displayName'].split(' ')
-                            if len(parts) > 1:
-                                gene_name = parts[-1]
-                        
-                        # Try parsing PhysicalEntity displayName (e.g., "CSF1R [plasma membrane]")
-                        if not gene_name and 'displayName' in pe:
-                            # Take the part before the first bracket
-                            gene_name = pe['displayName'].split(' [')[0]
-                            
-                        if not gene_name:
-                            gene_name = 'Unknown'
-                            
-                        proteins.append({
-                            'gene_name': gene_name,
-                            'uniprot_id': uniprot_id,
-                            'protein_name': pe.get('displayName', 'N/A')
-                        })
-        
+        data = response.json()
+
+        # Iterate through the physical entities (PEs)
+        for pe in data:
+            # UniProt info is nested inside 'refEntities'
+            ref_entities = pe.get('refEntities', [])
+            if not ref_entities:
+                continue
+
+            for ref in ref_entities:
+                # Robustly check if this is a UniProt entry
+                # The API response often omits 'databaseName', so we check multiple fields
+                is_uniprot = False
+                if ref.get('databaseName') == 'UniProt':
+                    is_uniprot = True
+                elif ref.get('schemaClass') in ['ReferenceGeneProduct', 'ReferenceIsoform']:
+                    is_uniprot = True
+                elif str(ref.get('stId', '')).startswith('uniprot:'):
+                    is_uniprot = True
+                elif str(ref.get('displayName', '')).startswith('UniProt:'):
+                    is_uniprot = True
+
+                if is_uniprot:
+                    # 1. Extract UniProt ID
+                    uniprot_id = ref.get('identifier', 'N/A')
+
+                    # 2. Extract Gene Name (try multiple sources)
+                    gene_name = None
+
+                    # Try explicit geneName list in refEntity
+                    if 'geneName' in ref and ref['geneName']:
+                        gene_name = ref['geneName'][0]
+
+                    # Try parsing refEntity displayName (e.g., "UniProt:P07333 CSF1R")
+                    if not gene_name and 'displayName' in ref:
+                        parts = ref['displayName'].split(' ')
+                        if len(parts) > 1:
+                            gene_name = parts[-1]
+
+                    # Try parsing PhysicalEntity displayName (e.g., "CSF1R [plasma membrane]")
+                    if not gene_name and 'displayName' in pe:
+                        # Take the part before the first bracket
+                        gene_name = pe['displayName'].split(' [')[0]
+
+                    if not gene_name:
+                        gene_name = 'Unknown'
+
+                    proteins.append({
+                        'gene_name': gene_name,
+                        'uniprot_id': uniprot_id,
+                        'protein_name': pe.get('displayName', 'N/A')
+                    })
+
         return proteins
 
-    except requests.RequestException:
-        # Return empty list on failure instead of crashing
-        return []
+    except requests.RequestException as exc:
+        logger.exception(
+            "Reactome pathway protein request raised exception "
+            "for pathway_id=%s url=%s",
+            pathway_id,
+            url,
+        )
+        raise PathwayProteinFetchError(
+            f"Request failed while fetching pathway proteins for {pathway_id}"
+        ) from exc
+    except (ValueError, TypeError) as exc:
+        logger.exception(
+            "Reactome pathway protein response parsing failed "
+            "for pathway_id=%s url=%s",
+            pathway_id,
+            url,
+        )
+        raise PathwayProteinFetchError(
+            f"Failed to parse pathway protein response for {pathway_id}"
+        ) from exc
 
 
 def query_string(gene_list: List[str], species: int = 9606, required_score: int = 700):

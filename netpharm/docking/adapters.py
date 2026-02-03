@@ -54,7 +54,7 @@ def parse_david_results(directory: Path, prefix: str = "") -> pd.DataFrame:
     }
     
     for filename, source in file_map.items():
-        filepath = directory / filename
+        filepath = directory / (prefix + filename)
         if not filepath.exists():
             continue
             

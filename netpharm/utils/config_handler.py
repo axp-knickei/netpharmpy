@@ -53,18 +53,33 @@ def prompt_user_config():
         smiles = input("Enter SMILES string: ").strip()
         config['compound'] = {'smiles': smiles}
     else:
-        print("\n❌ Invalid input type. Please restart and enter 'cid' or 'smiles'.")
-        exit(1)
+        raise ValueError("Invalid input type. Please enter 'cid' or 'smiles'.")
     
     # Target prediction thresholds
     print("\n--- TARGET PREDICTION THRESHOLDS ---")
     print("📄 Paper defaults: SwissTargetPrediction=0.0, SuperPred=0.5")
-    
-    swiss_thresh = input("SwissTargetPrediction threshold [0.0]: ").strip()
-    swiss_thresh = float(swiss_thresh) if swiss_thresh else 0.0
-    
-    superpred_thresh = input("SuperPred threshold [0.5]: ").strip()
-    superpred_thresh = float(superpred_thresh) if superpred_thresh else 0.5
+
+    while True:
+        swiss_thresh_input = input("SwissTargetPrediction threshold [0.0]: ").strip()
+        if not swiss_thresh_input:
+            swiss_thresh = 0.0
+            break
+        try:
+            swiss_thresh = float(swiss_thresh_input)
+            break
+        except ValueError:
+            print("❌ Invalid SwissTargetPrediction threshold. Please enter a number.")
+
+    while True:
+        superpred_thresh_input = input("SuperPred threshold [0.5]: ").strip()
+        if not superpred_thresh_input:
+            superpred_thresh = 0.5
+            break
+        try:
+            superpred_thresh = float(superpred_thresh_input)
+            break
+        except ValueError:
+            print("❌ Invalid SuperPred threshold. Please enter a number.")
     
     config['target_prediction'] = {
         'swiss_threshold': swiss_thresh,
@@ -75,16 +90,29 @@ def prompt_user_config():
     print("\n--- PATHWAY SELECTION ---")
     print("💡 Find pathways at: https://reactome.org/PathwayBrowser/")
     print("   You can enter keywords or specific pathway IDs (R-HSA-XXXXXX)")
-    
-    pathway_input = input("\nEnter pathway keywords (comma-separated) or IDs: ").strip()
-    pathway_list = [p.strip() for p in pathway_input.split(',')]
+
+    while True:
+        pathway_input = input("\nEnter pathway keywords (comma-separated) or IDs: ").strip()
+        if pathway_input:
+            pathway_list = [p.strip() for p in pathway_input.split(',') if p.strip()]
+            if pathway_list:
+                break
+        print("❌ Pathway input cannot be empty. Please provide at least one keyword or ID.")
     
     config['pathways'] = {'search_terms': pathway_list}
     
     # STRING network parameters
     print("\n--- STRING NETWORK PARAMETERS ---")
-    string_conf = input("STRING confidence threshold [0.700]: ").strip()
-    string_conf = float(string_conf) if string_conf else 0.700
+    while True:
+        string_conf_input = input("STRING confidence threshold [0.700]: ").strip()
+        if not string_conf_input:
+            string_conf = 0.700
+            break
+        try:
+            string_conf = float(string_conf_input)
+            break
+        except ValueError:
+            print("❌ Invalid STRING confidence threshold. Please enter a number.")
     
     config['string'] = {'confidence': string_conf}
     
@@ -118,8 +146,10 @@ def get_config(config_path=None):
     Returns:
         dict: Configuration dictionary
     """
-    if config_path and os.path.exists(config_path):
-        print(f"Loading configuration from: {config_path}")
-        return load_config(config_path)
-    else:
-        return prompt_user_config()
+    if config_path:
+        if os.path.exists(config_path):
+            print(f"Loading configuration from: {config_path}")
+            return load_config(config_path)
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    return prompt_user_config()

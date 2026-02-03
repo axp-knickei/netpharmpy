@@ -8,7 +8,7 @@ Usage:
 
 import sys
 import argparse
-from netpharm import NetworkPharmacology
+from netpharm import NetworkPharmacology, __version__
 from netpharm.utils.config_handler import get_config
 
 
@@ -16,7 +16,7 @@ def main():
     """Main entry point for the network pharmacology tool."""
     
     parser = argparse.ArgumentParser(
-        description='Network Pharmacology Analysis Tool v1.0.0',
+        description=f'Network Pharmacology Analysis Tool v{__version__}',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -29,7 +29,7 @@ Examples:
     # Specify output directory
     python main.py --config config.yaml --output ./my_results
 
-For documentation, visit: [Your GitHub URL]
+For documentation, visit: https://github.com/axp-knickei/netpharmpy
         """
     )
     

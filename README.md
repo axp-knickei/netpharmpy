@@ -490,6 +490,7 @@ This makes the workflow suitable for **iterative scientific reasoning**, peer re
 - **Installation Guide**: See [Installation](#installation)
 - **Tutorial**: See [examples/curcumin_example.py](examples/curcumin_example.py)
 - **API Reference**: Coming soon
+- **Repository**: https://github.com/axp-knickei/netpharmpy
 - **Troubleshooting**: Check [Issues](https://github.com/axp-knickei/netpharmpy/issues)
 
 ---

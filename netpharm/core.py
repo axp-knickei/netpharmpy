@@ -10,6 +10,7 @@ from .pathways import PathwayAnalyzer
 from .network import NetworkAnalyzer
 from .enrichment import EnrichmentAnalyzer
 from .visualize import NetworkVisualizer
+from .visualize_static import StaticVisualizer
 from .utils.logger import setup_logger
 from .utils.config_handler import get_config
 
@@ -62,6 +63,7 @@ class NetworkPharmacology:
         self.network_analyzer = NetworkAnalyzer(self.logger)
         self.enrichment_analyzer = EnrichmentAnalyzer(self.logger)
         self.visualizer = NetworkVisualizer(self.output_dir)
+        self.static_visualizer = StaticVisualizer(self.output_dir)
         
         # Data storage
         self.compound_data = None
@@ -201,6 +203,11 @@ class NetworkPharmacology:
                 top_n=15,
                 label_connectors=False,
             )
+            
+            # Generate static publication figures
+            self.logger.info("\nGenerating publication-quality figures...")
+            self.static_visualizer.plot_network_hubs(self.network, hub_nodes=hub_nodes)
+            self.static_visualizer.plot_centrality_distribution(metrics)
 
             return self.network
     
